@@ -13,7 +13,6 @@ import datasets
 from utils import select_device, natural_keys, gazeto3d, angular
 from model import L2CS
 
-
 def parse_args():
     """Parse input arguments."""
     parser = argparse.ArgumentParser(
@@ -103,14 +102,14 @@ if __name__ == '__main__':
     ])
 
     if data_set=="mpiigaze":
-        model_used=getArch(arch, bins)
+
+        model_used = getArch(arch, bins)
 
         for fold in range(15):
-
             folder = os.listdir(args.gazeMpiilabel_dir)
             folder.sort()
             testlabelpathombined = [os.path.join(args.gazeMpiilabel_dir, j) for j in folder] 
-            gaze_dataset=datasets.Mpiigaze(testlabelpathombined,args.gazeMpiimage_dir, transformations, False, angle, fold)
+            gaze_dataset = datasets.Mpiigaze(testlabelpathombined,args.gazeMpiimage_dir, transformations, False, angle, fold)
 
             test_loader = torch.utils.data.DataLoader(
                 dataset=gaze_dataset,
@@ -119,29 +118,21 @@ if __name__ == '__main__':
                 num_workers=4,
                 pin_memory=True)
             
-            
             if not os.path.exists(os.path.join(evalpath, f"fold"+str(fold))):
                 os.makedirs(os.path.join(evalpath, f"fold"+str(fold)))
 
             softmax = nn.Softmax(dim=1)
             with open(os.path.join(evalpath, os.path.join("fold"+str(fold), data_set+".log")), 'w') as outfile:
-                configuration = f"\ntest configuration equal gpu_id={gpu}, batch_size={batch_size}, model_arch={arch}\nStart testing dataset={data_set}, fold={fold}---------------------------------------\n"
-                print(configuration)
-                outfile.write(configuration)
                 epoch_list=[]
                 avg_MAE=[]
-
                 epochs = [snapshot_path]
-
 
                 model=model_used
                 saved_state_dict = torch.load(snapshot_path)
-                # saved_state_dict = torch.load(os.path.join(snapshot_path+"/fold"+str(fold),epochs))
                 model.load_state_dict(saved_state_dict)
                 model.cuda(gpu)
                 model.eval()
                 total = 0
-                # idx_tensor = [idx for idx in range(28)]
                 idx_tensor = [idx for idx in range(90)]
 
                 idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
@@ -151,38 +142,21 @@ if __name__ == '__main__':
                         images = Variable(images).cuda(gpu)
                         total += cont_labels.size(0)
 
-                        label_pitch = cont_labels[:,0].float()*np.pi/180
-                        label_yaw = cont_labels[:,1].float()*np.pi/180
+                        label_pitch = cont_labels[:,1].float()*np.pi/180
+                        label_yaw = cont_labels[:,0].float()*np.pi/180
                         
-
-                        gaze_pitch, gaze_yaw = model(images)
-                        # # Binned predictions
-                        # _, pitch_bpred = torch.max(gaze_pitch.data, 1)
-                        # _, yaw_bpred = torch.max(gaze_yaw.data, 1)
-                        # Continuous predictions
+                        gaze_yaw, gaze_pitch = model(images)
                         pitch_predicted = softmax(gaze_pitch)
                         yaw_predicted = softmax(gaze_yaw)
-                        # mapping from binned (0 to 28) to angels (-42 to 42)                
-                        # pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * 3 - 42
-                        # yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * 3 - 42
-                      
-                      
-                        # pitch_predicted = torch.sum(pitch_predicted * idx_tensor) * 4 - 180
-                        # yaw_predicted = torch.sum(yaw_predicted * idx_tensor) * 4 - 180
-
-                        # pitch_predicted = pitch_predicted*np.pi/180
-                        # yaw_predicted = yaw_predicted*np.pi/180
                         pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * 4 - 180
                         yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * 4 - 180
                         pitch_predicted = pitch_predicted*np.pi/180
                         yaw_predicted = yaw_predicted*np.pi/180
 
-
                         for p,y,pl,yl in zip(pitch_predicted, yaw_predicted, label_pitch, label_yaw):
                             avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
-                            outfile.write(f"p_pred:{pitch_predicted}, y_pred:{yaw_predicted}, p_l:{label_pitch}, y_l:{label_yaw}")
+                            # outfile.write(f"p_pred:{pitch_predicted}, y_pred:{yaw_predicted}, p_l:{label_pitch}, y_l:{label_yaw}")
         
-                        
                     x = ''.join(filter(lambda i: i.isdigit(), epochs))
                     epoch_list.append(x)
                     avg_MAE.append(avg_error/ total)
@@ -190,14 +164,4 @@ if __name__ == '__main__':
                     outfile.write(loger)
                     print(loger)
         
-            fig = plt.figure(figsize=(14, 8))        
-            plt.xlabel('epoch')
-            plt.ylabel('avg')
-            plt.title('Gaze angular error')
-            plt.legend()
-            plt.plot(epoch_list, avg_MAE, color='k', label='mae')
-            fig.savefig(os.path.join(evalpath, os.path.join("fold"+str(fold), data_set+".png")), format='png')
-            # plt.show()
-
-            
-            
+                     
