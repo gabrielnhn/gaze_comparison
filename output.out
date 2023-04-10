@@ -1,0 +1,120 @@
+0 items removed from dataset that have an angle > 90
+
+test configuration equal gpu_id=cuda:0, batch_size=5, model_arch=ResNet50
+Start testing dataset=mpiigaze, fold=0---------------------------------------
+
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+[['../models/L2CSNet_gaze360.pkl']---mpiigaze] Total Num:3000,MAE:97.97841572922003 
+
+0 items removed from dataset that have an angle > 90
+
+test configuration equal gpu_id=cuda:0, batch_size=5, model_arch=ResNet50
+Start testing dataset=mpiigaze, fold=1---------------------------------------
+
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+[['../models/L2CSNet_gaze360.pkl']---mpiigaze] Total Num:3000,MAE:99.92182670813679 
+
+0 items removed from dataset that have an angle > 90
+
+test configuration equal gpu_id=cuda:0, batch_size=5, model_arch=ResNet50
+Start testing dataset=mpiigaze, fold=2---------------------------------------
+
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+[['../models/L2CSNet_gaze360.pkl']---mpiigaze] Total Num:3000,MAE:96.86962556864215 
+
+0 items removed from dataset that have an angle > 90
+
+test configuration equal gpu_id=cuda:0, batch_size=5, model_arch=ResNet50
+Start testing dataset=mpiigaze, fold=3---------------------------------------
+
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+[['../models/L2CSNet_gaze360.pkl']---mpiigaze] Total Num:3000,MAE:99.17891605409334 
+
+0 items removed from dataset that have an angle > 90
+
+test configuration equal gpu_id=cuda:0, batch_size=5, model_arch=ResNet50
+Start testing dataset=mpiigaze, fold=4---------------------------------------
+
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+[['../models/L2CSNet_gaze360.pkl']---mpiigaze] Total Num:3000,MAE:98.93248283888651 
+
+0 items removed from dataset that have an angle > 90
+
+test configuration equal gpu_id=cuda:0, batch_size=5, model_arch=ResNet50
+Start testing dataset=mpiigaze, fold=5---------------------------------------
+
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+[['../models/L2CSNet_gaze360.pkl']---mpiigaze] Total Num:3000,MAE:99.08495967742091 
+
+0 items removed from dataset that have an angle > 90
+
+test configuration equal gpu_id=cuda:0, batch_size=5, model_arch=ResNet50
+Start testing dataset=mpiigaze, fold=6---------------------------------------
+
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+[['../models/L2CSNet_gaze360.pkl']---mpiigaze] Total Num:3000,MAE:100.61747780213251 
+
+0 items removed from dataset that have an angle > 90
+
+test configuration equal gpu_id=cuda:0, batch_size=5, model_arch=ResNet50
+Start testing dataset=mpiigaze, fold=7---------------------------------------
+
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+[['../models/L2CSNet_gaze360.pkl']---mpiigaze] Total Num:3000,MAE:99.60635493586231 
+
+0 items removed from dataset that have an angle > 90
+
+test configuration equal gpu_id=cuda:0, batch_size=5, model_arch=ResNet50
+Start testing dataset=mpiigaze, fold=8---------------------------------------
+
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+[['../models/L2CSNet_gaze360.pkl']---mpiigaze] Total Num:3000,MAE:99.9183904775176 
+
+0 items removed from dataset that have an angle > 90
+
+test configuration equal gpu_id=cuda:0, batch_size=5, model_arch=ResNet50
+Start testing dataset=mpiigaze, fold=9---------------------------------------
+
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+[['../models/L2CSNet_gaze360.pkl']---mpiigaze] Total Num:3000,MAE:98.98569273505368 
+
+0 items removed from dataset that have an angle > 90
+
+test configuration equal gpu_id=cuda:0, batch_size=5, model_arch=ResNet50
+Start testing dataset=mpiigaze, fold=10---------------------------------------
+
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+[['../models/L2CSNet_gaze360.pkl']---mpiigaze] Total Num:3000,MAE:99.11630782166054 
+
+0 items removed from dataset that have an angle > 90
+
+test configuration equal gpu_id=cuda:0, batch_size=5, model_arch=ResNet50
+Start testing dataset=mpiigaze, fold=11---------------------------------------
+
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+[['../models/L2CSNet_gaze360.pkl']---mpiigaze] Total Num:3000,MAE:99.32564798860578 
+
+0 items removed from dataset that have an angle > 90
+
+test configuration equal gpu_id=cuda:0, batch_size=5, model_arch=ResNet50
+Start testing dataset=mpiigaze, fold=12---------------------------------------
+
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+[['../models/L2CSNet_gaze360.pkl']---mpiigaze] Total Num:3000,MAE:97.8714400665523 
+
+0 items removed from dataset that have an angle > 90
+
+test configuration equal gpu_id=cuda:0, batch_size=5, model_arch=ResNet50
+Start testing dataset=mpiigaze, fold=13---------------------------------------
+
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+[['../models/L2CSNet_gaze360.pkl']---mpiigaze] Total Num:3000,MAE:98.77643851558162 
+
+0 items removed from dataset that have an angle > 90
+
+test configuration equal gpu_id=cuda:0, batch_size=5, model_arch=ResNet50
+Start testing dataset=mpiigaze, fold=14---------------------------------------
+
+No artists with labels found to put in legend.  Note that artists whose label start with an underscore are ignored when legend() is called with no argument.
+[['../models/L2CSNet_gaze360.pkl']---mpiigaze] Total Num:3000,MAE:96.87236653487847 
+
