@@ -87,8 +87,11 @@ class Mpiigaze(Dataset):
     path=pathorg.copy()
     if train==True:
       path.pop(fold)
-    else:
+    elif train==False:
       path=path[fold]
+    else:
+        pass
+    
     if isinstance(path, list):
         for i in path:
             with open(i) as f:

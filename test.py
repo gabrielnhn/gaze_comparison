@@ -105,63 +105,66 @@ if __name__ == '__main__':
 
         model_used = getArch(arch, bins)
 
-        for fold in range(15):
-            folder = os.listdir(args.gazeMpiilabel_dir)
-            folder.sort()
-            testlabelpathombined = [os.path.join(args.gazeMpiilabel_dir, j) for j in folder] 
-            gaze_dataset = datasets.Mpiigaze(testlabelpathombined,args.gazeMpiimage_dir, transformations, False, angle, fold)
+        # for fold in range(15):
+        fold = ""
+        folder = os.listdir(args.gazeMpiilabel_dir)
+        folder.sort()
+        testlabelpathombined = [os.path.join(args.gazeMpiilabel_dir, j) for j in folder] 
+        gaze_dataset = datasets.Mpiigaze(testlabelpathombined,args.gazeMpiimage_dir, transformations, "all_images", angle, fold)
 
-            test_loader = torch.utils.data.DataLoader(
-                dataset=gaze_dataset,
-                batch_size=batch_size,
-                shuffle=True,
-                num_workers=4,
-                pin_memory=True)
-            
-            if not os.path.exists(os.path.join(evalpath, f"fold"+str(fold))):
-                os.makedirs(os.path.join(evalpath, f"fold"+str(fold)))
-
-            softmax = nn.Softmax(dim=1)
-            with open(os.path.join(evalpath, os.path.join("fold"+str(fold), data_set+".log")), 'w') as outfile:
-                epoch_list=[]
-                avg_MAE=[]
-                epochs = [snapshot_path]
-
-                model=model_used
-                saved_state_dict = torch.load(snapshot_path)
-                model.load_state_dict(saved_state_dict)
-                model.cuda(gpu)
-                model.eval()
-                total = 0
-                idx_tensor = [idx for idx in range(90)]
-
-                idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
-                avg_error = .0
-                with torch.no_grad():
-                    for j, (images, labels, cont_labels, name) in enumerate(test_loader):
-                        images = Variable(images).cuda(gpu)
-                        total += cont_labels.size(0)
-
-                        label_pitch = cont_labels[:,1].float()*np.pi/180
-                        label_yaw = cont_labels[:,0].float()*np.pi/180
-                        
-                        gaze_yaw, gaze_pitch = model(images)
-                        pitch_predicted = softmax(gaze_pitch)
-                        yaw_predicted = softmax(gaze_yaw)
-                        pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * 4 - 180
-                        yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * 4 - 180
-                        pitch_predicted = pitch_predicted*np.pi/180
-                        yaw_predicted = yaw_predicted*np.pi/180
-
-                        for p,y,pl,yl in zip(pitch_predicted, yaw_predicted, label_pitch, label_yaw):
-                            avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
-                            # outfile.write(f"p_pred:{pitch_predicted}, y_pred:{yaw_predicted}, p_l:{label_pitch}, y_l:{label_yaw}")
+        test_loader = torch.utils.data.DataLoader(
+            dataset=gaze_dataset,
+            batch_size=batch_size,
+            shuffle=True,
+            num_workers=4,
+            pin_memory=True)
         
-                    x = ''.join(filter(lambda i: i.isdigit(), epochs))
-                    epoch_list.append(x)
-                    avg_MAE.append(avg_error/ total)
-                    loger = f"[{epochs}---{args.dataset}] Total Num:{total},MAE:{avg_error/total} \n"
-                    outfile.write(loger)
-                    print(loger)
-        
-                     
+        # if not os.path.exists(os.path.join(evalpath, f"fold"+str(fold))):
+        #     os.makedirs(os.path.join(evalpath, f"fold"+str(fold)))
+
+        softmax = nn.Softmax(dim=1)
+        # with open(os.path.join(evalpath, os.path.join("fold"+str(fold), data_set+".log")), 'w') as outfile:
+        with open(os.path.join(evalpath, "OUTPUT.log"), 'w') as outfile:
+
+            epoch_list=[]
+            avg_MAE=[]
+            epochs = [snapshot_path]
+
+            model=model_used
+            saved_state_dict = torch.load(snapshot_path)
+            model.load_state_dict(saved_state_dict)
+            model.cuda(gpu)
+            model.eval()
+            total = 0
+            idx_tensor = [idx for idx in range(90)]
+
+            idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
+            avg_error = .0
+            with torch.no_grad():
+                for j, (images, labels, cont_labels, name) in enumerate(test_loader):
+                    images = Variable(images).cuda(gpu)
+                    total += cont_labels.size(0)
+
+                    label_pitch = cont_labels[:,1].float()*np.pi/180
+                    label_yaw = cont_labels[:,0].float()*np.pi/180
+                    
+                    gaze_yaw, gaze_pitch = model(images)
+                    pitch_predicted = softmax(gaze_pitch)
+                    yaw_predicted = softmax(gaze_yaw)
+                    pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * 4 - 180
+                    yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * 4 - 180
+                    pitch_predicted = pitch_predicted*np.pi/180
+                    yaw_predicted = yaw_predicted*np.pi/180
+
+                    for p,y,pl,yl in zip(pitch_predicted, yaw_predicted, label_pitch, label_yaw):
+                        avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
+                        # outfile.write(f"p_pred:{pitch_predicted}, y_pred:{yaw_predicted}, p_l:{label_pitch}, y_l:{label_yaw}")
+    
+                x = ''.join(filter(lambda i: i.isdigit(), epochs))
+                epoch_list.append(x)
+                avg_MAE.append(avg_error/ total)
+                loger = f"[{epochs}---{args.dataset}] Total Num:{total},MAE:{avg_error/total} \n"
+                outfile.write(loger)
+                print(loger)
+    
+                    
