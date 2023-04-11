@@ -125,7 +125,7 @@ if __name__ == '__main__':
             avg_MAE=[]
             # Base network structure
             model=getArch(arch, 90)
-            saved_state_dict = torch.load(os.path.join(snapshot_path, epochs))
+            saved_state_dict = torch.load(snapshot_path)
             model.load_state_dict(saved_state_dict)
             model.cuda(gpu)
             model.eval()
