@@ -165,9 +165,8 @@ if __name__ == '__main__':
                         avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
                     
         
-                x = ''.join(filter(lambda i: i.isdigit(), epochs))
                 avg_MAE.append(avg_error/total)
-                loger = f"[{epochs}---{args.dataset}] Total Num:{total}, MAE:{avg_error/total}\n"
+                loger = f"Total Num:{total}, MAE:{avg_error/total}\n"
                 outfile.write(loger)
                 print(loger)
         
