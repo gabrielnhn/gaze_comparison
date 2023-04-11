@@ -13,6 +13,9 @@ import datasets
 from utils import select_device, natural_keys, gazeto3d, angular
 from model import L2CS
 
+from fvcore.nn import FlopCountAnalysis
+import typing
+
 def parse_args():
     """Parse input arguments."""
     parser = argparse.ArgumentParser(
@@ -133,8 +136,11 @@ if __name__ == '__main__':
             idx_tensor = [idx for idx in range(90)]
             idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
             avg_error = .0
-            
-            
+
+            total_flops = 0
+            total_flops_by_operator = typing.Counter()
+            total_flops_by_module = typing.Counter()
+                        
             with torch.no_grad():           
                 for j, (images, labels, cont_labels, name) in enumerate(test_loader):
                     images = Variable(images).cuda(gpu)
@@ -164,9 +170,21 @@ if __name__ == '__main__':
                     for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
                         avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
                     
+                    # Calculate AGAIN, but calculate FLOPs
+                    flops = FlopCountAnalysis(model, images)
+
+                    total_flops += flops.total()
+                    total_flops_by_operator.update(flops.by_operator())
+                    total_flops_by_module.update(flops.by_module())
+
+
         
                 avg_MAE.append(avg_error/total)
-                loger = f"Total Num:{total}, MAE:{avg_error/total}\n"
-                outfile.write(loger)
-                print(loger)
+                log = f"Total Num:{total}, MAE:{avg_error/total}\n"
+                outfile.write(log)
+                print(log)
+
+                log = f"Total Flops:{total_flops}\nByOperator:{total_flops_by_operator}\nByModule:{total_flops_by_module}\n"
+                outfile.write(log)
+                print(log)
         
