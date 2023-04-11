@@ -105,7 +105,7 @@ if __name__ == '__main__':
         folder = os.listdir(args.gaze360label_dir)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir, j) for j in folder] 
-        gaze_dataset=datasets.Gaze360(args.gaze360label_dir,args.gaze360image_dir, transformations, 180, 4, train=False)
+        gaze_dataset=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir, transformations, 180, 4, train=False)
         test_loader = torch.utils.data.DataLoader(
             dataset=gaze_dataset,
             batch_size=batch_size,
