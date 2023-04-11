@@ -187,4 +187,8 @@ if __name__ == '__main__':
                 log = f"Total Flops:{total_flops}\nByOperator:{total_flops_by_operator}\nByModule:{total_flops_by_module}\n"
                 outfile.write(log)
                 print(log)
+
+                log = f"Total Flops/image:{total_flops/total}. Last flops:{flops.total()}"
+                outfile.write(log)
+                print(log)
         
