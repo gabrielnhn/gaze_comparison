@@ -149,12 +149,16 @@ if __name__ == '__main__':
             avg_error = .0
 
             model_dynamic = quantize_dynamic(
-                model=m, qconfig_spec={nn.LSTM, nn.Linear}, dtype=torch.qint8, inplace=False
+                model=original_model, qconfig_spec={nn.LSTM, nn.Linear}, dtype=torch.qint8, inplace=False
             )
+            torch.save(model_dynamic, "../Dynamic.pkl")
+
 
             qconfig_dict = {"": torch.quantization.default_dynamic_qconfig}  # An empty key denotes the default applied to all modules
-            model_prepared = quantize_fx.prepare_fx(m, qconfig_dict)
+            model_prepared = quantize_fx.prepare_fx(original_model, qconfig_dict)
             model_fx = quantize_fx.convert_fx(model_prepared)
+
+            torch.save(model_dynamic, "../FX.pkl")
 
 
             for model_name in ("original_model", "model_fx", "model_dynamic"):
