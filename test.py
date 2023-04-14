@@ -165,7 +165,7 @@ if __name__ == '__main__':
             torch.save(model_dynamic, "../FX.pkl")
 
 
-            for model_name in ("original_model", "model_fx", "model_dynamic"):
+            for model_name in ("original_model", "model_dynamic", "model_fx"):
 
                 log = f"For model {model_name}:\n"
                 outfile.write(log)
