@@ -16,6 +16,17 @@ from model import L2CS
 from fvcore.nn import FlopCountAnalysis
 import typing
 
+
+
+## FX MODE
+from torch.quantization import quantize_fx
+
+
+## EAGER MODE
+from torch.quantization import quantize_dynamic
+
+
+
 def parse_args():
     """Parse input arguments."""
     parser = argparse.ArgumentParser(
@@ -127,68 +138,83 @@ if __name__ == '__main__':
             avg_pitch=[]
             avg_MAE=[]
             # Base network structure
-            model=getArch(arch, 90)
+            original_model=getArch(arch, 90)
             saved_state_dict = torch.load(snapshot_path)
-            model.load_state_dict(saved_state_dict)
-            model.cuda(gpu)
-            model.eval()
+            original_model.load_state_dict(saved_state_dict)
+            original_model.cuda(gpu)
+            original_model.eval()
             total = 0
             idx_tensor = [idx for idx in range(90)]
             idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
             avg_error = .0
 
-            total_flops = 0
-            total_flops_by_operator = typing.Counter()
-            total_flops_by_module = typing.Counter()
+            model_dynamic = quantize_dynamic(
+                model=m, qconfig_spec={nn.LSTM, nn.Linear}, dtype=torch.qint8, inplace=False
+            )
+
+            qconfig_dict = {"": torch.quantization.default_dynamic_qconfig}  # An empty key denotes the default applied to all modules
+            model_prepared = quantize_fx.prepare_fx(m, qconfig_dict)
+            model_fx = quantize_fx.convert_fx(model_prepared)
+
+
+            for model_name in ("original_model", "model_fx", "model_dynamic"):
+
+                log = f"For model {model_name}:\n"
+                outfile.write(log)
+                print(log)
+
+                model = eval(model_name)
+
+                total_flops = 0
+                total_flops_by_operator = typing.Counter()
+                total_flops_by_module = typing.Counter()
+                            
+                with torch.no_grad():           
+                    for j, (images, labels, cont_labels, name) in enumerate(test_loader):
+                        images = Variable(images).cuda(gpu)
+                        total += cont_labels.size(0)
+
+                        label_pitch = cont_labels[:,1].float()*np.pi/180
+                        label_yaw = cont_labels[:,0].float()*np.pi/180
+
+                        gaze_yaw, gaze_pitch = model(images)
                         
-            with torch.no_grad():           
-                for j, (images, labels, cont_labels, name) in enumerate(test_loader):
-                    images = Variable(images).cuda(gpu)
-                    total += cont_labels.size(0)
+                        # Binned predictions
+                        _, pitch_bpred = torch.max(gaze_pitch.data, 1)
+                        _, yaw_bpred = torch.max(gaze_yaw.data, 1)
+                        
+            
+                        # Continuous predictions
+                        pitch_predicted = softmax(gaze_pitch)
+                        yaw_predicted = softmax(gaze_yaw)
+                        
+                        # mapping from binned (0 to 90) to angles (-180 to 180)  
+                        pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * 4 - 180
+                        yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * 4 - 180
 
-                    label_pitch = cont_labels[:,1].float()*np.pi/180
-                    label_yaw = cont_labels[:,0].float()*np.pi/180
+                        pitch_predicted = pitch_predicted*np.pi/180
+                        yaw_predicted = yaw_predicted*np.pi/180
 
-                    gaze_yaw, gaze_pitch = model(images)
-                    
-                    # Binned predictions
-                    _, pitch_bpred = torch.max(gaze_pitch.data, 1)
-                    _, yaw_bpred = torch.max(gaze_yaw.data, 1)
-                    
-        
-                    # Continuous predictions
-                    pitch_predicted = softmax(gaze_pitch)
-                    yaw_predicted = softmax(gaze_yaw)
-                    
-                    # mapping from binned (0 to 90) to angles (-180 to 180)  
-                    pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * 4 - 180
-                    yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * 4 - 180
+                        for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
+                            avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
+                        
+                        # Calculate AGAIN, but calculate FLOPs
+                        flops = FlopCountAnalysis(model, images)
 
-                    pitch_predicted = pitch_predicted*np.pi/180
-                    yaw_predicted = yaw_predicted*np.pi/180
+                        total_flops += flops.total()
+                        total_flops_by_operator.update(flops.by_operator())
 
-                    for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
-                        avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
-                    
-                    # Calculate AGAIN, but calculate FLOPs
-                    flops = FlopCountAnalysis(model, images)
+            
+                    avg_MAE.append(avg_error/total)
+                    log = f"\tTotal Num:{total}, MAE:{avg_error/total}\n"
+                    outfile.write(log)
+                    print(log)
 
-                    total_flops += flops.total()
-                    total_flops_by_operator.update(flops.by_operator())
-                    total_flops_by_module.update(flops.by_module())
+                    log = f"\tTotal Flops:{total_flops}\nByOperator:{total_flops_by_operator}\n"
+                    outfile.write(log)
+                    print(log)
 
-
-        
-                avg_MAE.append(avg_error/total)
-                log = f"Total Num:{total}, MAE:{avg_error/total}\n"
-                outfile.write(log)
-                print(log)
-
-                log = f"Total Flops:{total_flops}\nByOperator:{total_flops_by_operator}\nByModule:{total_flops_by_module}\n"
-                outfile.write(log)
-                print(log)
-
-                log = f"Total Flops/image:{total_flops/total}. Last flops:{flops.total()}"
-                outfile.write(log)
-                print(log)
-        
+                    log = f"\tTotal Flops/image:{total_flops/total}.\n"
+                    outfile.write(log)
+                    print(log)
+            
