@@ -154,8 +154,9 @@ if __name__ == '__main__':
             torch.save(model_dynamic, "../Dynamic.pkl")
 
 
-            images, labels, cont_labels, name = test_loader[0]
-            images = Variable(images).cuda(gpu)
+            for images, labels, cont_labels, name in test_loader:
+                images = Variable(images).cuda(gpu)
+                break
 
             qconfig_dict = {"": torch.quantization.default_dynamic_qconfig}  # An empty key denotes the default applied to all modules
             model_prepared = quantize_fx.prepare_fx(original_model, qconfig_dict, images)
