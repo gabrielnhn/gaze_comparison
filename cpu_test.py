@@ -90,7 +90,7 @@ def getArch(arch,bins):
 
 if __name__ == '__main__':
     args = parse_args()
-    cudnn.enabled = True
+    cudnn.enabled = False
     gpu = select_device(args.gpu_id, batch_size=args.batch_size)
     batch_size=args.batch_size
     arch=args.arch
