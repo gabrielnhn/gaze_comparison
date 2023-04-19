@@ -133,7 +133,7 @@ if __name__ == '__main__':
         optimizer_gaze = torch.optim.Adam(model.parameters(), args.lr)
 
         # configuration = f"\ntrain configuration, gpu_id={args.gpu_id}, batch_size={batch_size}, model_arch={args.arch}\nStart testing dataset={data_set}, loader={len(train_loader_gaze)}------------------------- \n"
-        configuration = f"\ntraining: batch_size={batch_size}\ncStart testing dataset={data_set}, loader={len(train_loader_gaze)}------------------------- \n"
+        configuration = f"\ntraining: batch_size={batch_size}\nStart testing dataset={data_set}, loader={len(train_loader_gaze)}------------------------- \n"
 
         print(configuration)
 
