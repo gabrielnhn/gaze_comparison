@@ -3,7 +3,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 import math
 import torch.nn.functional as F
-
+import torchvision
 
 class L2CS(nn.Module):
     def __init__(self, block, layers, num_bins):
