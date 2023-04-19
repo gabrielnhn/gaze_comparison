@@ -11,7 +11,7 @@ import torchvision
 
 import datasets
 from utils import select_device, natural_keys, gazeto3d, angular
-from model import L2CS
+from model import L2CS, ML2CS
 
 from fvcore.nn import FlopCountAnalysis
 import typing
@@ -52,6 +52,9 @@ def parse_args():
         default= "gaze360", type=str)
     parser.add_argument(
         '--snapshot', dest='snapshot', help='Path to the folder contains models.', 
+        default='output/snapshots/L2CS-gaze360-_loader-180-4-lr', type=str)
+    parser.add_argument(
+        '--snapshot_ml2cs', dest='snapshot_ml2cs', help='Path to the folder contains models.', 
         default='output/snapshots/L2CS-gaze360-_loader-180-4-lr', type=str)
     parser.add_argument(
         '--evalpath', dest='evalpath', help='path for the output evaluating gaze test.',
@@ -143,12 +146,20 @@ if __name__ == '__main__':
             original_model.load_state_dict(saved_state_dict)
             original_model.cuda(gpu)
             original_model.eval()
+
+            mobile_L2CS = ML2CS()
+            saved_state_dict = torch.load(args.snapshot_ml2cs)
+            mobile_L2CS.load_state_dict(saved_state_dict)
+            mobile_L2CS.cuda(gpu)
+            original_model.eval()
+
+
             total = 0
             idx_tensor = [idx for idx in range(90)]
             idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
             avg_error = .0
 
-            for model_name in ("original_L2CS", "mobile_L2CS"):
+            for model_name in ("original_model", "mobile_L2CS"):
 
                 log = f"For model {model_name}:\n"
                 outfile.write(log)
