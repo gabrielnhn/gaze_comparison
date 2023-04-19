@@ -154,10 +154,8 @@ if __name__ == '__main__':
             original_model.eval()
 
 
-            total = 0
             idx_tensor = [idx for idx in range(90)]
             idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
-            avg_error = .0
 
             for model_name in ("original_model", "mobile_L2CS"):
 
@@ -166,6 +164,9 @@ if __name__ == '__main__':
                 print(log)
 
                 model = eval(model_name)
+
+                total = 0
+                avg_error = .0
 
                 total_flops = 0
                 total_flops_by_operator = typing.Counter()
