@@ -108,7 +108,7 @@ if __name__ == '__main__':
             shuffle=True,
             num_workers=0,
             pin_memory=True)
-            
+
         torch.backends.cudnn.benchmark = True
 
         summary_name = '{}_{}'.format('ML2CS-gaze360-', int(time.time()))
@@ -132,7 +132,9 @@ if __name__ == '__main__':
         
         optimizer_gaze = torch.optim.Adam(model.parameters(), args.lr)
 
-        configuration = f"\ntrain configuration, gpu_id={args.gpu_id}, batch_size={batch_size}, model_arch={args.arch}\nStart testing dataset={data_set}, loader={len(train_loader_gaze)}------------------------- \n"
+        # configuration = f"\ntrain configuration, gpu_id={args.gpu_id}, batch_size={batch_size}, model_arch={args.arch}\nStart testing dataset={data_set}, loader={len(train_loader_gaze)}------------------------- \n"
+        configuration = f"\ntraining: batch_size={batch_size}\ncStart testing dataset={data_set}, loader={len(train_loader_gaze)}------------------------- \n"
+
         print(configuration)
 
         for epoch in range(num_epochs):
