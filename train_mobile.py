@@ -97,7 +97,8 @@ if __name__ == '__main__':
         model = ML2CS()
         
         model.cuda(gpu)
-        dataset=datasets.Gaze360(args.gaze360label_dir, args.gaze360image_dir, transformations, 180, 4)
+        testlabelpathombined = [os.path.join(args.gaze360label_dir, j) for j in folder] 
+        dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir, transformations, 180, 4)
         print('Loading data.')
         train_loader_gaze = DataLoader(
             dataset=dataset,
