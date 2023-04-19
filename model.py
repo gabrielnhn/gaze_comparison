@@ -76,7 +76,9 @@ class ML2CS(nn.Module):
     def __init__(self):
         num_bins = 90
         super(ML2CS, self).__init__()
-        self.backbone = torchvision.models.mobilenet_v2().features
+        # self.backbone = torchvision.models.mobilenet_v2().features
+        self.backbone = torchvision.models.mobilenet_v2()
+
 
         self.fc_yaw_gaze = nn.Linear(1280, num_bins)
         self.fc_pitch_gaze = nn.Linear(1280, num_bins)
