@@ -219,4 +219,5 @@ if __name__ == '__main__':
                     log = f"\tTotal Flops/image:{total_flops/total}.\n"
                     outfile.write(log)
                     print(log)
+                    del model
             
