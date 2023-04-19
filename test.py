@@ -148,24 +148,7 @@ if __name__ == '__main__':
             idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
             avg_error = .0
 
-            model_dynamic = quantize_dynamic(
-                model=original_model, qconfig_spec={nn.LSTM, nn.Linear}, dtype=torch.qint8, inplace=False
-            )
-            torch.save(model_dynamic, "../Dynamic.pkl")
-
-
-            for images, labels, cont_labels, name in test_loader:
-                images = Variable(images).cuda(gpu)
-                break
-
-            qconfig_dict = {"": torch.quantization.default_dynamic_qconfig}  # An empty key denotes the default applied to all modules
-            model_prepared = quantize_fx.prepare_fx(original_model, qconfig_dict, images)
-            model_fx = quantize_fx.convert_fx(model_prepared)
-
-            torch.save(model_dynamic, "../FX.pkl")
-
-
-            for model_name in ("original_model", "model_dynamic", "model_fx"):
+            for model_name in ("original_L2CS", "mobile_L2CS"):
 
                 log = f"For model {model_name}:\n"
                 outfile.write(log)
