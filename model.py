@@ -80,8 +80,12 @@ class ML2CS(nn.Module):
         self.backbone = torchvision.models.mobilenet_v2()
 
 
-        self.fc_yaw_gaze = nn.Linear(1280, num_bins)
-        self.fc_pitch_gaze = nn.Linear(1280, num_bins)
+        # self.fc_yaw_gaze = nn.Linear(1280, num_bins)
+        # self.fc_pitch_gaze = nn.Linear(1280, num_bins)
+        
+        self.fc_yaw_gaze = nn.Linear(1000, num_bins)
+        self.fc_pitch_gaze = nn.Linear(1000, num_bins)
+
 
 
     def forward(self, x):
