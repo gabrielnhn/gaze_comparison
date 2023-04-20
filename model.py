@@ -77,7 +77,7 @@ class ML2CS(nn.Module):
         num_bins = 90
         super(ML2CS, self).__init__()
         # self.backbone = torchvision.models.mobilenet_v2().features
-        self.backbone = torchvision.models.mobilenet_v2()
+        self.backbone = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
 
 
         # self.fc_yaw_gaze = nn.Linear(1280, num_bins)
