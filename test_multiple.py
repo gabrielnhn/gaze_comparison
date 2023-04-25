@@ -10,9 +10,11 @@ import torch.backends.cudnn as cudnn
 import torchvision
 
 import datasets
-from utils import select_device, natural_keys, gazeto3d, angular, getArch
+from utils import select_device, natural_keys, gazeto3d, angular
 from model import L2CS, ML2CS
 
+from fvcore.nn import FlopCountAnalysis
+import typing
 
 
 def parse_args():
