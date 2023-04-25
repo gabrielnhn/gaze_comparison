@@ -10,12 +10,8 @@ import torch.backends.cudnn as cudnn
 import torchvision
 
 import datasets
-from utils import select_device, natural_keys, gazeto3d, angular
-from model import L2CS
-
-
-
-
+from utils import select_device, natural_keys, gazeto3d, angular, getArch
+from model import L2CS, ML2CS
 
 
 
@@ -57,11 +53,6 @@ def parse_args():
     parser.add_argument(
         '--arch', dest='arch', help='Network architecture, can be: ResNet18, ResNet34, [ResNet50], ''ResNet101, ResNet152, Squeezenet_1_0, Squeezenet_1_1, MobileNetV2',
         default='ResNet50', type=str)
-
-    parser.add_argument(
-        '--bins', dest='bins', help='bruh', default=90, type=int)
-    parser.add_argument(
-        '--angle', dest='angle', help='bruh', default=90, type=int)
     # ---------------------------------------------------------------------------------------------------------------------
     # Important args ------------------------------------------------------------------------------------------------------
     args = parser.parse_args()
@@ -96,7 +87,7 @@ if __name__ == '__main__':
     snapshot_path = args.snapshot
     bins=args.bins
     angle=args.angle
-    # bin_width=args.bin_width
+    bin_width=args.bin_width
 
     transformations = transforms.Compose([
         transforms.Resize(448),
@@ -139,11 +130,14 @@ if __name__ == '__main__':
             avg_MAE=[]
             for epochs in folder:
                 # Base network structure
-                model=getArch(arch, 90)
+
+                model = ML2CS()
                 saved_state_dict = torch.load(os.path.join(snapshot_path, epochs))
                 model.load_state_dict(saved_state_dict)
                 model.cuda(gpu)
-                model.eval()
+                original_model.eval()
+
+
                 total = 0
                 idx_tensor = [idx for idx in range(90)]
                 idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
@@ -197,101 +191,3 @@ if __name__ == '__main__':
         plt.plot(epoch_list, avg_MAE, color='k', label='mae')
         fig.savefig(os.path.join(evalpath,data_set+".png"), format='png')
         plt.show()
-
- 
-
-    elif data_set=="mpiigaze":
-        model_used=getArch(arch, bins)
-
-        for fold in range(15):
-            folder = os.listdir(args.gazeMpiilabel_dir)
-            folder.sort()
-            testlabelpathombined = [os.path.join(args.gazeMpiilabel_dir, j) for j in folder] 
-            gaze_dataset=datasets.Mpiigaze(testlabelpathombined,args.gazeMpiimage_dir, transformations, False, angle, fold)
-
-            test_loader = torch.utils.data.DataLoader(
-                dataset=gaze_dataset,
-                batch_size=batch_size,
-                shuffle=True,
-                num_workers=4,
-                pin_memory=True)
-            
-            
-            if not os.path.exists(os.path.join(evalpath, f"fold"+str(fold))):
-                os.makedirs(os.path.join(evalpath, f"fold"+str(fold)))
-
-            # list all epochs for testing
-            folder = os.listdir(os.path.join(snapshot_path,"fold"+str(fold)))
-            folder.sort(key=natural_keys)
-            
-            softmax = nn.Softmax(dim=1)
-            with open(os.path.join(evalpath, os.path.join("fold"+str(fold), data_set+".log")), 'w') as outfile:
-                configuration = f"\ntest configuration equal gpu_id={gpu}, batch_size={batch_size}, model_arch={arch}\nStart testing dataset={data_set}, fold={fold}---------------------------------------\n"
-                print(configuration)
-                outfile.write(configuration)
-                epoch_list=[]
-                avg_MAE=[]
-                for epochs in folder: 
-                    model=model_used
-                    saved_state_dict = torch.load(os.path.join(snapshot_path+"/fold"+str(fold),epochs))
-                    model= nn.DataParallel(model,device_ids=[0])
-                    model.load_state_dict(saved_state_dict)
-                    model.cuda(gpu)
-                    model.eval()
-                    total = 0
-                    idx_tensor = [idx for idx in range(28)]
-                    idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
-                    avg_error = .0
-                    with torch.no_grad():
-                        for j, (images, labels, cont_labels, name) in enumerate(test_loader):
-                            images = Variable(images).cuda(gpu)
-                            total += cont_labels.size(0)
-
-                            label_pitch = cont_labels[:,0].float()*np.pi/180
-                            label_yaw = cont_labels[:,1].float()*np.pi/180
-                            
-
-                            gaze_pitch, gaze_yaw = model(images)
-                            
-                            # Binned predictions
-                            _, pitch_bpred = torch.max(gaze_pitch.data, 1)
-                            _, yaw_bpred = torch.max(gaze_yaw.data, 1)
-                            
-                
-                            # Continuous predictions
-                            pitch_predicted = softmax(gaze_pitch)
-                            yaw_predicted = softmax(gaze_yaw)
-                            
-                            # mapping from binned (0 to 28) to angels (-42 to 42)                
-                            pitch_predicted = \
-                                torch.sum(pitch_predicted * idx_tensor, 1).cpu() * 3 - 42
-                            yaw_predicted = \
-                                torch.sum(yaw_predicted * idx_tensor, 1).cpu() * 3 - 42
-                            
-                            
-                            pitch_predicted = pitch_predicted*np.pi/180
-                            yaw_predicted = yaw_predicted*np.pi/180
-
-                            for p,y,pl,yl in zip(pitch_predicted, yaw_predicted, label_pitch, label_yaw):
-                                avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
-            
-                        
-                    x = ''.join(filter(lambda i: i.isdigit(), epochs))
-                    epoch_list.append(x)
-                    avg_MAE.append(avg_error/ total)
-                    loger = f"[{epochs}---{args.dataset}] Total Num:{total},MAE:{avg_error/total} \n"
-                    outfile.write(loger)
-                    print(loger)
-        
-            fig = plt.figure(figsize=(14, 8))        
-            plt.xlabel('epoch')
-            plt.ylabel('avg')
-            plt.title('Gaze angular error')
-            plt.legend()
-            plt.plot(epoch_list, avg_MAE, color='k', label='mae')
-            fig.savefig(os.path.join(evalpath, os.path.join("fold"+str(fold), data_set+".png")), format='png')
-            # plt.show()
-
-            
-           
-
