@@ -55,6 +55,8 @@ def parse_args():
     parser.add_argument(
         '--arch', dest='arch', help='Network architecture, can be: ResNet18, ResNet34, [ResNet50], ''ResNet101, ResNet152, Squeezenet_1_0, Squeezenet_1_1, MobileNetV2',
         default='ResNet50', type=str)
+    parser.add_argument(
+    '--angle', dest='angle', help='bruh', default=90, type=int)
     # ---------------------------------------------------------------------------------------------------------------------
     # Important args ------------------------------------------------------------------------------------------------------
     args = parser.parse_args()
