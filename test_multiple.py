@@ -83,13 +83,13 @@ if __name__ == '__main__':
     cudnn.enabled = True
     gpu = select_device(args.gpu_id, batch_size=args.batch_size)
     batch_size=args.batch_size
-    arch=args.arch
+    # arch=args.arch
     data_set=args.dataset
     evalpath =args.evalpath
     snapshot_path = args.snapshot
-    bins=args.bins
+    # bins=args.bins
     angle=args.angle
-    bin_width=args.bin_width
+    # bin_width=args.bin_width
 
     transformations = transforms.Compose([
         transforms.Resize(448),
