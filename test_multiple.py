@@ -143,7 +143,7 @@ if __name__ == '__main__':
                 saved_state_dict = torch.load(os.path.join(snapshot_path, epochs))
                 model.load_state_dict(saved_state_dict)
                 model.cuda(gpu)
-                original_model.eval()
+                model.eval()
 
 
                 total = 0
