@@ -15,7 +15,7 @@ import datasets
 from model import ML2CS
 # from utils import select_device
 from utils import select_device, natural_keys, gazeto3d, angular
-
+import numpy as np
 
 def parse_args():
     """Parse input arguments."""
