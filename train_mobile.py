@@ -203,8 +203,8 @@ if __name__ == '__main__':
                 yaw_predicted = \
                     torch.sum(yaw_predicted * idx_tensor, 1) * 4 - 180
 
-                for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch_cont_gaze,label_yaw_cont_gaze):
-                    avg_error_train += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
+
+
 
                 loss_reg_pitch = reg_criterion(
                     pitch_predicted, label_pitch_cont_gaze)
@@ -224,8 +224,8 @@ if __name__ == '__main__':
                 torch.autograd.backward(loss_seq, grad_seq)
                 optimizer_gaze.step()
                 # scheduler.step()
-                
                 iter_gaze += 1
+                
 
                 if (i+1) % 100 == 0:
                     print('Epoch [%d/%d], Iter [%d/%d] Losses: '
@@ -239,6 +239,10 @@ if __name__ == '__main__':
                         )
                         )
         
+                pitch_predicted = yaw_predicted.cpu()
+                yaw_predicted = yaw_predicted.cpu()
+                for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch_cont_gaze,label_yaw_cont_gaze):
+                    avg_error_train += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
 
             avg_MAE_train.append(avg_error_train)
 
