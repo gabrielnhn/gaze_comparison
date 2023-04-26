@@ -239,12 +239,6 @@ if __name__ == '__main__':
                         )
                         )
         
-                pitch_predicted = yaw_predicted.cpu()
-                yaw_predicted = yaw_predicted.cpu()
-                for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch_cont_gaze,label_yaw_cont_gaze):
-                    avg_error_train += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
-
-            avg_MAE_train.append(avg_error_train)
 
             ##### VALIDATIONNNN
             for j, (images, labels, cont_labels, name) in enumerate(val_loader):
@@ -296,7 +290,7 @@ if __name__ == '__main__':
         plt.ylabel('avg')
         plt.title('Gaze angular error')
         plt.legend()
-        plt.plot(epoch_list, avg_MAE_test, color='b', label='train')
+        # plt.plot(epoch_list, avg_MAE_train, color='b', label='train')
         plt.plot(epoch_list, avg_MAE_val, color='g', label='val')
 
         pyplot.locator_params(axis='x', nbins=40)
