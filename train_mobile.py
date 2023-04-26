@@ -13,18 +13,31 @@ import torchvision
 
 import datasets
 from model import ML2CS
-from utils import select_device
+# from utils import select_device
+from utils import select_device, natural_keys, gazeto3d, angular
+
 
 def parse_args():
     """Parse input arguments."""
     parser = argparse.ArgumentParser(description='Gaze estimation using L2CSNet.')
     # Gaze360
     parser.add_argument(
-        '--gaze360image_dir', dest='gaze360image_dir', help='Directory path for gaze images.',
+        '--gaze360image_dir_train', dest='gaze360image_dir_train', help='Directory path for gaze images.',
         default='datasets/Gaze360/Image', type=str)
     parser.add_argument(
-        '--gaze360label_dir', dest='gaze360label_dir', help='Directory path for gaze labels.',
-        default='datasets/Gaze360/Label/train.label', type=str)
+        '--gaze360label_dir_train', dest='gaze360label_dir_train', help='Directory path for gaze labels.',
+        default='datasets/Gaze360/Label/test.label', type=str)
+   
+    parser.add_argument(
+        '--gaze360image_dir_val', dest='gaze360image_dir_val', help='Directory path for gaze images.',
+        default='datasets/Gaze360/Image', type=str)
+    parser.add_argument(
+        '--gaze360label_dir_val', dest='gaze360label_dir_val', help='Directory path for gaze labels.',
+        default='datasets/Gaze360/Label/test.label', type=str)
+   
+    
+    
+    
     # Important args -------------------------------------------------------------------------------------------------------
     # ----------------------------------------------------------------------------------------------------------------------
     parser.add_argument(
@@ -137,7 +150,13 @@ if __name__ == '__main__':
 
         print(configuration)
 
+        avg_MAE_train=[]
+        avg_MAE_val=[]
         for epoch in range(num_epochs):
+            avg_error_train = 0
+            avg_error_val = 0
+
+
             sum_loss_pitch_gaze = sum_loss_yaw_gaze = iter_gaze = 0
             
             for i, (images_gaze, labels_gaze, cont_labels_gaze,name) in enumerate(train_loader_gaze):
@@ -165,6 +184,9 @@ if __name__ == '__main__':
                     torch.sum(pitch_predicted * idx_tensor, 1) * 4 - 180
                 yaw_predicted = \
                     torch.sum(yaw_predicted * idx_tensor, 1) * 4 - 180
+
+                for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch_cont_gaze,label_yaw_cont_gaze):
+                    avg_error_train += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
 
                 loss_reg_pitch = reg_criterion(
                     pitch_predicted, label_pitch_cont_gaze)
@@ -199,7 +221,43 @@ if __name__ == '__main__':
                         )
                         )
         
+
+            avg_MAE_train.append(avg_error_train)
+
+            ##### VALIDATIONNNN
+            for j, (images, labels, cont_labels, name) in enumerate(val_loader):
+                images = Variable(images).cuda(gpu)
+                total += cont_labels.size(0)
+
+                label_pitch = cont_labels[:,0].float()*np.pi/180
+                label_yaw = cont_labels[:,1].float()*np.pi/180
+                
+
+                gaze_pitch, gaze_yaw = model(images)
+                
+                # Binned predictions
+                _, pitch_bpred = torch.max(gaze_pitch.data, 1)
+                _, yaw_bpred = torch.max(gaze_yaw.data, 1)
+                
+    
+                # Continuous predictions
+                pitch_predicted = softmax(gaze_pitch)
+                yaw_predicted = softmax(gaze_yaw)
+                
+                # mapping from binned (0 to 28) to angels (-180 to 180)  
+                pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * 4 - 180
+                yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * 4 - 180
+
+                pitch_predicted = pitch_predicted*np.pi/180
+                yaw_predicted = yaw_predicted*np.pi/180
+
+                for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
+                    avg_error_val += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
+                
+
+            avg_MAE_val.append(avg_error_val)
           
+
             if epoch % 1 == 0 and epoch < num_epochs:
                 print('Taking snapshot...',
                     torch.save(model.state_dict(),
@@ -207,3 +265,17 @@ if __name__ == '__main__':
                                 '_epoch_' + str(epoch+1) + '.pkl')
                     )
             
+
+        
+        fig = plt.figure()        
+        plt.xlabel('epoch')
+        plt.ylabel('avg')
+        plt.title('Gaze angular error')
+        plt.legend()
+        plt.plot(epoch_list, avg_MAE_test, color='b', label='train')
+        plt.plot(epoch_list, avg_MAE_val, color='g', label='val')
+
+        pyplot.locator_params(axis='x', nbins=40)
+
+        fig.savefig(os.path.join(output,data_set+".png"), format='png')
+        # plt.show()

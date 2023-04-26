@@ -254,7 +254,7 @@ if __name__ == '__main__':
         
 
 
-        fig = plt.figure(figsize=(14, 8))        
+        fig = plt.figure()        
         plt.xlabel('epoch')
         plt.ylabel('avg')
         plt.title('Gaze angular error')
@@ -265,4 +265,4 @@ if __name__ == '__main__':
         pyplot.locator_params(axis='x', nbins=30)
 
         fig.savefig(os.path.join(evalpath,data_set+".png"), format='png')
-        plt.show()
+        # plt.show()
