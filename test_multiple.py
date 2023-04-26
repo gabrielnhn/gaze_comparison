@@ -23,10 +23,10 @@ def parse_args():
         description='Gaze estimation using L2CSNet .')
      # Gaze360
     parser.add_argument(
-        '--gaze360image_dir', dest='gaze360image_dir', help='Directory path for gaze images.',
+        '--gaze360image_dir_test', dest='gaze360image_dir_test', help='Directory path for gaze images.',
         default='datasets/Gaze360/Image', type=str)
     parser.add_argument(
-        '--gaze360label_dir', dest='gaze360label_dir', help='Directory path for gaze labels.',
+        '--gaze360label_dir_test', dest='gaze360label_dir_test', help='Directory path for gaze labels.',
         default='datasets/Gaze360/Label/test.label', type=str)
     # mpiigaze
     parser.add_argument(
@@ -106,18 +106,31 @@ if __name__ == '__main__':
     
     if data_set=="gaze360":
         
-        folder = os.listdir(args.gaze360label_dir)
+        # TEST
+        folder = os.listdir(args.gaze360label_dir_test)
         folder.sort()
-        testlabelpathombined = [os.path.join(args.gaze360label_dir, j) for j in folder]
-        gaze_dataset=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir, transformations, 180, 4, train=False)
+        testlabelpathombined = [os.path.join(args.gaze360label_dir_test, j) for j in folder]
+        gaze_dataset_test=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_test, transformations, 180, 4, train=False)
         
         test_loader = torch.utils.data.DataLoader(
-            dataset=gaze_dataset,
+            dataset=gaze_dataset_test,
             batch_size=batch_size,
             shuffle=False,
             num_workers=4,
             pin_memory=True)
 
+        # VALIDATION
+        folder = os.listdir(args.gaze360label_dir_val)
+        folder.sort()
+        testlabelpathombined = [os.path.join(args.gaze360label_dir_val, j) for j in folder]
+        gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 180, 4, train=False)
+        
+        val_loader = torch.utils.data.DataLoader(
+            dataset=gaze_dataset_val,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=4,
+            pin_memory=True)
         
 
         if not os.path.exists(evalpath):
@@ -135,7 +148,8 @@ if __name__ == '__main__':
             epoch_list=[]
             avg_yaw=[]
             avg_pitch=[]
-            avg_MAE=[]
+            avg_MAE_test=[]
+            avg_MAE_val=[]
             for epochs in folder:
                 # Base network structure
 
@@ -146,14 +160,51 @@ if __name__ == '__main__':
                 model.eval()
 
 
-                total = 0
-                idx_tensor = [idx for idx in range(90)]
-                idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
-                avg_error = .0
                 
-                
+                ### TEST
                 with torch.no_grad():           
+                    total = 0
+                    idx_tensor = [idx for idx in range(90)]
+                    idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
+                    avg_error = .0
                     for j, (images, labels, cont_labels, name) in enumerate(test_loader):
+                        images = Variable(images).cuda(gpu)
+                        total += cont_labels.size(0)
+
+                        label_pitch = cont_labels[:,0].float()*np.pi/180
+                        label_yaw = cont_labels[:,1].float()*np.pi/180
+                        
+
+                        gaze_pitch, gaze_yaw = model(images)
+                        
+                        # Binned predictions
+                        _, pitch_bpred = torch.max(gaze_pitch.data, 1)
+                        _, yaw_bpred = torch.max(gaze_yaw.data, 1)
+                        
+            
+                        # Continuous predictions
+                        pitch_predicted = softmax(gaze_pitch)
+                        yaw_predicted = softmax(gaze_yaw)
+                        
+                        # mapping from binned (0 to 28) to angels (-180 to 180)  
+                        pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * 4 - 180
+                        yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * 4 - 180
+
+                        pitch_predicted = pitch_predicted*np.pi/180
+                        yaw_predicted = yaw_predicted*np.pi/180
+
+                        for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
+                            avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
+
+                avg_MAE_test.append(avg_error/total)
+
+                ### VALIDATION        
+                with torch.no_grad():
+                    total = 0
+                    idx_tensor = [idx for idx in range(90)]
+                    idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
+                    avg_error = .0        
+                    for j, (images, labels, cont_labels, name) in enumerate(val_loader):
                         images = Variable(images).cuda(gpu)
                         total += cont_labels.size(0)
 
@@ -183,19 +234,25 @@ if __name__ == '__main__':
                             avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
                         
         
-                    
-                x = ''.join(filter(lambda i: i.isdigit(), epochs))
+                avg_MAE_val.append(avg_error/total)
+                
+                # x = ''.join(filter(lambda i: i.isdigit(), epochs))
+                # loger = f"[{epochs}---{args.dataset}] Total Num:{total},MAE:{avg_error/total}\n"
+                # outfile.write(loger)
+                # print(loger)
                 epoch_list.append(x)
-                avg_MAE.append(avg_error/total)
-                loger = f"[{epochs}---{args.dataset}] Total Num:{total},MAE:{avg_error/total}\n"
-                outfile.write(loger)
-                print(loger)
         
+
+
         fig = plt.figure(figsize=(14, 8))        
         plt.xlabel('epoch')
         plt.ylabel('avg')
         plt.title('Gaze angular error')
         plt.legend()
-        plt.plot(epoch_list, avg_MAE, color='k', label='mae')
+        plt.plot(epoch_list, avg_MAE_test, color='b', label='test')
+        plt.plot(epoch_list, avg_MAE_val, color='g', label='val')
+
+        pyplot.locator_params(axis='x', nbins=30)
+
         fig.savefig(os.path.join(evalpath,data_set+".png"), format='png')
         plt.show()
