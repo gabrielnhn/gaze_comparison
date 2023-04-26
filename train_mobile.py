@@ -243,7 +243,7 @@ if __name__ == '__main__':
             ##### VALIDATIONNNN
             for j, (images, labels, cont_labels, name) in enumerate(val_loader):
                 images = Variable(images).cuda(gpu)
-                total += cont_labels.size(0)
+                # total += cont_labels.size(0)
 
                 label_pitch = cont_labels[:,0].float()*np.pi/180
                 label_yaw = cont_labels[:,1].float()*np.pi/180
