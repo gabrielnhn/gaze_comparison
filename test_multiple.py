@@ -28,6 +28,16 @@ def parse_args():
     parser.add_argument(
         '--gaze360label_dir_test', dest='gaze360label_dir_test', help='Directory path for gaze labels.',
         default='datasets/Gaze360/Label/test.label', type=str)
+   
+    parser.add_argument(
+        '--gaze360image_dir_val', dest='gaze360image_dir_val', help='Directory path for gaze images.',
+        default='datasets/Gaze360/Image', type=str)
+    parser.add_argument(
+        '--gaze360label_dir_val', dest='gaze360label_dir_val', help='Directory path for gaze labels.',
+        default='datasets/Gaze360/Label/test.label', type=str)
+   
+   
+   
     # mpiigaze
     parser.add_argument(
         '--gazeMpiimage_dir', dest='gazeMpiimage_dir', help='Directory path for gaze images.',
