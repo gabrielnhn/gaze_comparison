@@ -110,10 +110,10 @@ if __name__ == '__main__':
         model = ML2CS()
         model.cuda(gpu)
         
-        folder = os.listdir(args.gaze360label_dir)
+        folder = os.listdir(args.gaze360label_dir_train)
         folder.sort()
-        testlabelpathombined = [os.path.join(args.gaze360label_dir, j) for j in folder] 
-        dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir, transformations, 180, 4)
+        testlabelpathombined = [os.path.join(args.gaze360label_dir_train, j) for j in folder] 
+        dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, transformations, 180, 4)
         print('Loading data.')
         train_loader_gaze = DataLoader(
             dataset=dataset,
@@ -121,6 +121,24 @@ if __name__ == '__main__':
             shuffle=True,
             num_workers=0,
             pin_memory=True)
+
+        # VALIDATION
+        folder = os.listdir(args.gaze360label_dir_val)
+        folder.sort()
+        testlabelpathombined = [os.path.join(args.gaze360label_dir_val, j) for j in folder]
+        gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 180, 4, train=False)
+        
+        val_loader = torch.utils.data.DataLoader(
+            dataset=gaze_dataset_val,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=4,
+            pin_memory=True)
+        
+
+
+
+
 
         torch.backends.cudnn.benchmark = True
 
@@ -266,6 +284,8 @@ if __name__ == '__main__':
                     )
             
 
+
+        epoch_list = list(range(num_epochs))
         
         fig = plt.figure()        
         plt.xlabel('epoch')
