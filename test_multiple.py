@@ -171,50 +171,13 @@ if __name__ == '__main__':
 
 
                 
-                ### TEST
-                # with torch.no_grad():           
-                #     total = 0
-                #     idx_tensor = [idx for idx in range(90)]
-                #     idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
-                #     avg_error = .0
-                #     for j, (images, labels, cont_labels, name) in enumerate(test_loader):
-                #         images = Variable(images).cuda(gpu)
-                #         total += cont_labels.size(0)
-
-                #         label_pitch = cont_labels[:,0].float()*np.pi/180
-                #         label_yaw = cont_labels[:,1].float()*np.pi/180
-                        
-
-                #         gaze_pitch, gaze_yaw = model(images)
-                        
-                #         # Binned predictions
-                #         _, pitch_bpred = torch.max(gaze_pitch.data, 1)
-                #         _, yaw_bpred = torch.max(gaze_yaw.data, 1)
-                        
-            
-                #         # Continuous predictions
-                #         pitch_predicted = softmax(gaze_pitch)
-                #         yaw_predicted = softmax(gaze_yaw)
-                        
-                #         # mapping from binned (0 to 28) to angels (-180 to 180)  
-                #         pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * 4 - 180
-                #         yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * 4 - 180
-
-                #         pitch_predicted = pitch_predicted*np.pi/180
-                #         yaw_predicted = yaw_predicted*np.pi/180
-
-                #         for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
-                #             avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
-
-                # avg_MAE_test.append(avg_error/total)
-
-                ### VALIDATION        
-                with torch.no_grad():
+                ## TEST
+                with torch.no_grad():           
                     total = 0
                     idx_tensor = [idx for idx in range(90)]
                     idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
-                    avg_error = .0        
-                    for j, (images, labels, cont_labels, name) in enumerate(val_loader):
+                    avg_error = .0
+                    for j, (images, labels, cont_labels, name) in enumerate(test_loader):
                         images = Variable(images).cuda(gpu)
                         total += cont_labels.size(0)
 
@@ -242,9 +205,46 @@ if __name__ == '__main__':
 
                         for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
                             avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
+
+                avg_MAE_test.append(avg_error/total)
+
+                ### VALIDATION        
+                # with torch.no_grad():
+                #     total = 0
+                #     idx_tensor = [idx for idx in range(90)]
+                #     idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
+                #     avg_error = .0        
+                #     for j, (images, labels, cont_labels, name) in enumerate(val_loader):
+                #         images = Variable(images).cuda(gpu)
+                #         total += cont_labels.size(0)
+
+                #         label_pitch = cont_labels[:,0].float()*np.pi/180
+                #         label_yaw = cont_labels[:,1].float()*np.pi/180
+                        
+
+                #         gaze_pitch, gaze_yaw = model(images)
+                        
+                #         # Binned predictions
+                #         _, pitch_bpred = torch.max(gaze_pitch.data, 1)
+                #         _, yaw_bpred = torch.max(gaze_yaw.data, 1)
+                        
+            
+                #         # Continuous predictions
+                #         pitch_predicted = softmax(gaze_pitch)
+                #         yaw_predicted = softmax(gaze_yaw)
+                        
+                #         # mapping from binned (0 to 28) to angels (-180 to 180)  
+                #         pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * 4 - 180
+                #         yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * 4 - 180
+
+                #         pitch_predicted = pitch_predicted*np.pi/180
+                #         yaw_predicted = yaw_predicted*np.pi/180
+
+                #         for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
+                #             avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
                         
         
-                avg_MAE_val.append(avg_error)
+                # avg_MAE_val.append(avg_error)
                 
                 # x = ''.join(filter(lambda i: i.isdigit(), epochs))
                 loger = f"[{epochs}---{args.dataset}] Total Num:{total},MAE:{avg_error/total}\n"
