@@ -250,10 +250,10 @@ if __name__ == '__main__':
                 loger = f"[{epochs}---{args.dataset}] Total Num:{total},MAE:{avg_error/total}\n"
                 outfile.write(loger)
                 print(loger)
-                epoch_list.append(x)
+                # epoch_list.append(x)
         
 
-
+        epoch_list = list(range(num_epochs))
         fig = plt.figure()        
         plt.xlabel('epoch')
         plt.ylabel('avg')
