@@ -253,7 +253,7 @@ if __name__ == '__main__':
                 # epoch_list.append(x)
         
 
-        epoch_list = list(range(num_epochs))
+        epoch_list = list(range(len(folder)))
         fig = plt.figure()        
         plt.xlabel('epoch')
         plt.ylabel('avg')
