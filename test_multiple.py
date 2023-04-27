@@ -247,9 +247,9 @@ if __name__ == '__main__':
                 avg_MAE_val.append(avg_error)
                 
                 # x = ''.join(filter(lambda i: i.isdigit(), epochs))
-                # loger = f"[{epochs}---{args.dataset}] Total Num:{total},MAE:{avg_error/total}\n"
-                # outfile.write(loger)
-                # print(loger)
+                loger = f"[{epochs}---{args.dataset}] Total Num:{total},MAE:{avg_error/total}\n"
+                outfile.write(loger)
+                print(loger)
                 epoch_list.append(x)
         
 
