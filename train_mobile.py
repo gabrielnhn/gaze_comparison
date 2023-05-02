@@ -12,7 +12,7 @@ import torch.backends.cudnn as cudnn
 import torchvision
 
 import datasets
-from model import ML2CS
+from model import ML2CS, ML2CS180
 # from utils import select_device
 from utils import select_device, natural_keys, gazeto3d, angular
 import numpy as np
@@ -109,11 +109,16 @@ if __name__ == '__main__':
 
         model = ML2CS()
         model.cuda(gpu)
-        
+        bins = model.num_bins
+
+        binwidth = int(360/bins)
+
+
+
         folder = os.listdir(args.gaze360label_dir_train)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_train, j) for j in folder] 
-        dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, transformations, 180, 4)
+        dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, transformations, 180, binwidth)
         print('Loading data.')
         train_loader_gaze = DataLoader(
             dataset=dataset,
@@ -126,7 +131,7 @@ if __name__ == '__main__':
         folder = os.listdir(args.gaze360label_dir_val)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_val, j) for j in folder]
-        gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 180, 4, train=False)
+        gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 180, binwidth, train=False)
         
         val_loader = torch.utils.data.DataLoader(
             dataset=gaze_dataset_val,
@@ -151,7 +156,7 @@ if __name__ == '__main__':
         criterion = nn.CrossEntropyLoss().cuda(gpu)
         reg_criterion = nn.MSELoss().cuda(gpu)
         softmax = nn.Softmax(dim=1).cuda(gpu)
-        idx_tensor = [idx for idx in range(90)]
+        idx_tensor = [idx for idx in range(model.num_bins)]
         idx_tensor = Variable(torch.FloatTensor(idx_tensor)).cuda(gpu)
 
         # Optimizer gaze
@@ -199,9 +204,9 @@ if __name__ == '__main__':
                 yaw_predicted = softmax(yaw)
 
                 pitch_predicted = \
-                    torch.sum(pitch_predicted * idx_tensor, 1) * 4 - 180
+                    torch.sum(pitch_predicted * idx_tensor, 1) * binwidth - 180
                 yaw_predicted = \
-                    torch.sum(yaw_predicted * idx_tensor, 1) * 4 - 180
+                    torch.sum(yaw_predicted * idx_tensor, 1) * binwidth - 180
 
 
 
@@ -240,7 +245,7 @@ if __name__ == '__main__':
                         )
         
 
-            ##### VALIDATIONNNN
+            ##### VALIDATIONNNNNN
             with torch.no_grad(): 
                 for j, (images, labels, cont_labels, name) in enumerate(val_loader):
                     images = Variable(images).cuda(gpu)
@@ -262,8 +267,8 @@ if __name__ == '__main__':
                     yaw_predicted = softmax(gaze_yaw)
                     
                     # mapping from binned (0 to 28) to angels (-180 to 180)  
-                    pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * 4 - 180
-                    yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * 4 - 180
+                    pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
+                    yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
 
                     pitch_predicted = pitch_predicted*np.pi/180
                     yaw_predicted = yaw_predicted*np.pi/180
