@@ -113,6 +113,8 @@ if __name__ == '__main__':
 
         binwidth = int(360/bins)
 
+        print("BINWIDTH", binwidth)
+
 
 
         folder = os.listdir(args.gaze360label_dir_train)
@@ -127,18 +129,18 @@ if __name__ == '__main__':
             num_workers=0,
             pin_memory=True)
 
-        # VALIDATION
-        folder = os.listdir(args.gaze360label_dir_val)
-        folder.sort()
-        testlabelpathombined = [os.path.join(args.gaze360label_dir_val, j) for j in folder]
-        gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 180, binwidth, train=False)
+        # # VALIDATION
+        # folder = os.listdir(args.gaze360label_dir_val)
+        # folder.sort()
+        # testlabelpathombined = [os.path.join(args.gaze360label_dir_val, j) for j in folder]
+        # gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 180, binwidth, train=False)
         
-        val_loader = torch.utils.data.DataLoader(
-            dataset=gaze_dataset_val,
-            batch_size=batch_size,
-            shuffle=False,
-            num_workers=4,
-            pin_memory=True)
+        # val_loader = torch.utils.data.DataLoader(
+        #     dataset=gaze_dataset_val,
+        #     batch_size=batch_size,
+        #     shuffle=False,
+        #     num_workers=4,
+        #     pin_memory=True)
         
 
 
