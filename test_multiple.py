@@ -113,6 +113,11 @@ if __name__ == '__main__':
     ])
 
 
+
+
+
+
+    binwidth = int(360/180)
     
     if data_set=="gaze360":
         
@@ -120,8 +125,8 @@ if __name__ == '__main__':
         folder = os.listdir(args.gaze360label_dir_test)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_test, j) for j in folder]
-        gaze_dataset_test=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_test, transformations, 90, 4, train=False)
-        # gaze_dataset_test=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_test, transformations, 180, 4, train=False)
+        # gaze_dataset_test=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_test, transformations, 90, binwidth, train=False)
+        gaze_dataset_test=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_test, transformations, 180, binwidth, train=False)
         
         test_loader = torch.utils.data.DataLoader(
             dataset=gaze_dataset_test,
@@ -134,7 +139,7 @@ if __name__ == '__main__':
         folder = os.listdir(args.gaze360label_dir_val)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_val, j) for j in folder]
-        gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 180, 4, train=False)
+        gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 180, binwidth, train=False)
         
         val_loader = torch.utils.data.DataLoader(
             dataset=gaze_dataset_val,
@@ -164,11 +169,15 @@ if __name__ == '__main__':
             for epochs in folder:
                 # Base network structure
 
-                model = ML2CS()
+                model = ML2CS180()
                 saved_state_dict = torch.load(os.path.join(snapshot_path, epochs))
                 model.load_state_dict(saved_state_dict)
                 model.cuda(gpu)
                 model.eval()
+
+                bins = model.num_bins
+                binwidth = int(360/bins)
+
 
 
                 
@@ -198,8 +207,8 @@ if __name__ == '__main__':
                         yaw_predicted = softmax(gaze_yaw)
                         
                         # mapping from binned (0 to 28) to angels (-180 to 180)  
-                        pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * 4 - 180
-                        yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * 4 - 180
+                        pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
+                        yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
 
                         pitch_predicted = pitch_predicted*np.pi/180
                         yaw_predicted = yaw_predicted*np.pi/180
