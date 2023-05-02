@@ -98,7 +98,7 @@ class ML2CS(nn.Module):
 class ML2CS180(nn.Module):
     def __init__(self):
         self.num_bins = 180
-        super(ML2CS, self).__init__()
+        super(ML2CS180, self).__init__()
         # self.backbone = torchvision.models.mobilenet_v2().features
         self.backbone = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
 
