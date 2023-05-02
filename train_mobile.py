@@ -245,47 +245,47 @@ if __name__ == '__main__':
                         )
         
 
-            ##### VALIDATIONNNNNN
-            with torch.no_grad(): 
-                for j, (images, labels, cont_labels, name) in enumerate(val_loader):
-                    images = Variable(images).cuda(gpu)
-                    # total += cont_labels.size(0)
+            # ##### VALIDATIONNNNNN
+            # with torch.no_grad(): 
+            #     for j, (images, labels, cont_labels, name) in enumerate(val_loader):
+            #         images = Variable(images).cuda(gpu)
+            #         # total += cont_labels.size(0)
 
-                    label_pitch = cont_labels[:,0].float()*np.pi/180
-                    label_yaw = cont_labels[:,1].float()*np.pi/180
+            #         label_pitch = cont_labels[:,0].float()*np.pi/180
+            #         label_yaw = cont_labels[:,1].float()*np.pi/180
                     
 
-                    gaze_pitch, gaze_yaw = model(images)
+            #         gaze_pitch, gaze_yaw = model(images)
                     
-                    # Binned predictions
-                    _, pitch_bpred = torch.max(gaze_pitch.data, 1)
-                    _, yaw_bpred = torch.max(gaze_yaw.data, 1)
+            #         # Binned predictions
+            #         _, pitch_bpred = torch.max(gaze_pitch.data, 1)
+            #         _, yaw_bpred = torch.max(gaze_yaw.data, 1)
                     
         
-                    # Continuous predictions
-                    pitch_predicted = softmax(gaze_pitch)
-                    yaw_predicted = softmax(gaze_yaw)
+            #         # Continuous predictions
+            #         pitch_predicted = softmax(gaze_pitch)
+            #         yaw_predicted = softmax(gaze_yaw)
                     
-                    # mapping from binned (0 to 28) to angels (-180 to 180)  
-                    pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
-                    yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
+            #         # mapping from binned (0 to 28) to angels (-180 to 180)  
+            #         pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
+            #         yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
 
-                    pitch_predicted = pitch_predicted*np.pi/180
-                    yaw_predicted = yaw_predicted*np.pi/180
+            #         pitch_predicted = pitch_predicted*np.pi/180
+            #         yaw_predicted = yaw_predicted*np.pi/180
 
-                    for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
-                        avg_error_val += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
+            #         for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
+            #             avg_error_val += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
                     
 
-                avg_MAE_val.append(avg_error_val)
+            #     avg_MAE_val.append(avg_error_val)
           
 
-            if epoch % 1 == 0 and epoch < num_epochs:
-                print('Taking snapshot...',
-                    torch.save(model.state_dict(),
-                                output +'/'+
-                                '_epoch_' + str(epoch+1) + '.pkl')
-                    )
+            # if epoch % 1 == 0 and epoch < num_epochs:
+            #     print('Taking snapshot...',
+            #         torch.save(model.state_dict(),
+            #                     output +'/'+
+            #                     '_epoch_' + str(epoch+1) + '.pkl')
+            #         )
             
 
 
