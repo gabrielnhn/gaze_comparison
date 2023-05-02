@@ -74,17 +74,17 @@ class L2CS(nn.Module):
 
 class ML2CS(nn.Module):
     def __init__(self):
-        num_bins = 90
+        self.num_bins = 90
         super(ML2CS, self).__init__()
         # self.backbone = torchvision.models.mobilenet_v2().features
         self.backbone = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
 
 
-        # self.fc_yaw_gaze = nn.Linear(1280, num_bins)
-        # self.fc_pitch_gaze = nn.Linear(1280, num_bins)
+        # self.fc_yaw_gaze = nn.Linear(1280, self.num_bins)
+        # self.fc_pitch_gaze = nn.Linear(1280, self.num_bins)
         
-        self.fc_yaw_gaze = nn.Linear(1000, num_bins)
-        self.fc_pitch_gaze = nn.Linear(1000, num_bins)
+        self.fc_yaw_gaze = nn.Linear(1000, self.num_bins)
+        self.fc_pitch_gaze = nn.Linear(1000, self.num_bins)
 
 
 
@@ -97,7 +97,7 @@ class ML2CS(nn.Module):
 
 class ML2CS180(nn.Module):
     def __init__(self):
-        num_bins = 180
+        self.num_bins = 180
         super(ML2CS, self).__init__()
         # self.backbone = torchvision.models.mobilenet_v2().features
         self.backbone = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
@@ -106,8 +106,8 @@ class ML2CS180(nn.Module):
         # self.fc_yaw_gaze = nn.Linear(1280, num_bins)
         # self.fc_pitch_gaze = nn.Linear(1280, num_bins)
         
-        self.fc_yaw_gaze = nn.Linear(1000, num_bins)
-        self.fc_pitch_gaze = nn.Linear(1000, num_bins)
+        self.fc_yaw_gaze = nn.Linear(1000, self.num_bins)
+        self.fc_pitch_gaze = nn.Linear(1000, self.num_bins)
 
 
 
