@@ -107,7 +107,7 @@ if __name__ == '__main__':
         #     saved_state_dict = torch.load(args.snapshot)
         #     model.load_state_dict(saved_state_dict)
 
-        model = ML2CS()
+        model = ML2CS180()
         model.cuda(gpu)
         bins = model.num_bins
 
