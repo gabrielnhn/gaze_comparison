@@ -6,7 +6,8 @@ import cv2
 import torch
 from torch.utils.data.dataset import Dataset
 from torchvision import transforms
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class Gaze360(Dataset):
