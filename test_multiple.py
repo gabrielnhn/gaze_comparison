@@ -184,7 +184,7 @@ if __name__ == '__main__':
                 ## TEST
                 with torch.no_grad():           
                     total = 0
-                    idx_tensor = [idx for idx in range(binwidth)]
+                    idx_tensor = [idx for idx in range(bins)]
                     idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
                     avg_error = .0
                     for j, (images, labels, cont_labels, name) in enumerate(test_loader):
@@ -221,7 +221,7 @@ if __name__ == '__main__':
                 ## VALIDATION        
                 with torch.no_grad():
                     total = 0
-                    idx_tensor = [idx for idx in range(binwidth)]
+                    idx_tensor = [idx for idx in range(bins)]
                     idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
                     avg_error = .0        
                     for j, (images, labels, cont_labels, name) in enumerate(val_loader):
