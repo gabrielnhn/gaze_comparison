@@ -216,7 +216,8 @@ if __name__ == '__main__':
                         for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
                             avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
 
-                avg_MAE_test.append(avg_error/total)
+                t = avg_error/total
+                avg_MAE_test.append(t)
 
                 ## VALIDATION        
                 with torch.no_grad():
@@ -244,8 +245,8 @@ if __name__ == '__main__':
                         yaw_predicted = softmax(gaze_yaw)
                         
                         # mapping from binned (0 to 28) to angels (-180 to 180)  
-                        pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * 4 - 180
-                        yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * 4 - 180
+                        pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
+                        yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
 
                         pitch_predicted = pitch_predicted*np.pi/180
                         yaw_predicted = yaw_predicted*np.pi/180
@@ -253,11 +254,11 @@ if __name__ == '__main__':
                         for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
                             avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
                         
-        
-                avg_MAE_val.append(avg_error)
+                v = avg_error/total
+                avg_MAE_val.append(v)
                 
                 # x = ''.join(filter(lambda i: i.isdigit(), epochs))
-                loger = f"[{epochs}---{args.dataset}] Total Num:{total},MAE:{avg_error/total}\n"
+                loger = f"[{epochs}---{args.dataset}] Total Num:{total},MAE_V:{v}, MAE_T:{t}\n"
                 outfile.write(loger)
                 print(loger)
                 # epoch_list.append(x)
@@ -272,7 +273,7 @@ if __name__ == '__main__':
         plt.plot(epoch_list, avg_MAE_test, color='b', label='test')
         plt.plot(epoch_list, avg_MAE_val, color='g', label='val')
 
-        pyplot.locator_params(axis='x', nbins=30)
+        # plt.locator_params(axis='x', nbins=30)
 
         fig.savefig(os.path.join(evalpath,data_set+".png"), format='png')
         # plt.show()
