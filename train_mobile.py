@@ -17,6 +17,9 @@ from model import ML2CS, ML2CS180
 from utils import select_device, natural_keys, gazeto3d, angular
 import numpy as np
 
+import matplotlib.pyplot as plt
+
+
 def parse_args():
     """Parse input arguments."""
     parser = argparse.ArgumentParser(description='Gaze estimation using L2CSNet.')
@@ -282,12 +285,12 @@ if __name__ == '__main__':
             #     avg_MAE_val.append(avg_error_val)
           
 
-            # if epoch % 1 == 0 and epoch < num_epochs:
-            #     print('Taking snapshot...',
-            #         torch.save(model.state_dict(),
-            #                     output +'/'+
-            #                     '_epoch_' + str(epoch+1) + '.pkl')
-            #         )
+            if epoch % 1 == 0 and epoch < num_epochs:
+                print('Taking snapshot...',
+                    torch.save(model.state_dict(),
+                                output +'/'+
+                                '_epoch_' + str(epoch+1) + '.pkl')
+                    )
             
 
 
