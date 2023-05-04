@@ -11,7 +11,7 @@ import torchvision
 
 import datasets
 from utils import select_device, natural_keys, gazeto3d, angular
-from model import L2CS, ML2CS
+from model import L2CS, ML2CS, ML2CS180
 
 from fvcore.nn import FlopCountAnalysis
 import typing
