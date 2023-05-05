@@ -118,3 +118,27 @@ class ML2CS180(nn.Module):
         pre_pitch_gaze = self.fc_pitch_gaze(x)
         return pre_yaw_gaze, pre_pitch_gaze
 
+
+class ML2CS360(nn.Module):
+    def __init__(self):
+        self.num_bins = 360
+        super(ML2CS360, self).__init__()
+        # self.backbone = torchvision.models.mobilenet_v2().features
+        self.backbone = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
+
+
+        # self.fc_yaw_gaze = nn.Linear(1280, num_bins)
+        # self.fc_pitch_gaze = nn.Linear(1280, num_bins)
+        
+        self.fc_yaw_gaze = nn.Linear(1000, self.num_bins)
+        self.fc_pitch_gaze = nn.Linear(1000, self.num_bins)
+
+
+
+    def forward(self, x):
+        x = self.backbone(x)
+        # gaze
+        pre_yaw_gaze =  self.fc_yaw_gaze(x)
+        pre_pitch_gaze = self.fc_pitch_gaze(x)
+        return pre_yaw_gaze, pre_pitch_gaze
+

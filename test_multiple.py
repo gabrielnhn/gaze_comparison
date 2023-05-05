@@ -11,7 +11,7 @@ import torchvision
 
 import datasets
 from utils import select_device, natural_keys, gazeto3d, angular
-from model import L2CS, ML2CS, ML2CS180
+from model import L2CS, ML2CS, ML2CS180, ML2CS360
 
 from fvcore.nn import FlopCountAnalysis
 import typing
@@ -117,7 +117,7 @@ if __name__ == '__main__':
 
 
 
-    binwidth = int(360/180)
+    binwidth = int(360/360)
     
     if data_set=="gaze360":
         
@@ -169,7 +169,7 @@ if __name__ == '__main__':
             for epochs in folder:
                 # Base network structure
 
-                model = ML2CS180()
+                model = ML2CS360()
                 saved_state_dict = torch.load(os.path.join(snapshot_path, epochs))
                 model.load_state_dict(saved_state_dict)
                 model.cuda(gpu)

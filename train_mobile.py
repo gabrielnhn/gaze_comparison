@@ -12,7 +12,7 @@ import torch.backends.cudnn as cudnn
 import torchvision
 
 import datasets
-from model import ML2CS, ML2CS180
+from model import ML2CS, ML2CS180, ML2CS360
 # from utils import select_device
 from utils import select_device, natural_keys, gazeto3d, angular
 import numpy as np
@@ -110,7 +110,8 @@ if __name__ == '__main__':
         #     saved_state_dict = torch.load(args.snapshot)
         #     model.load_state_dict(saved_state_dict)
 
-        model = ML2CS180()
+        # model = ML2CS180()
+        model = ML2CS360()
         model.cuda(gpu)
         bins = model.num_bins
 
