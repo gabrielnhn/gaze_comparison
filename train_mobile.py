@@ -236,11 +236,12 @@ if __name__ == '__main__':
                         )
         
 
-                pitch_predicted_cpu = pitch_predicted_cpu*np.pi/180
-                yaw_predicted_cpu = yaw_predicted_cpu*np.pi/180
-                
-                for p,y,pl,yl in zip(pitch_predicted_cpu.cpu(),yaw_predicted_cpu.cpu(),label_pitch_cont_gaze,label_yaw_cont_gaze):
-                    avg_error_train += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
+                with torch.no_grad():
+                    pitch_predicted_cpu = pitch_predicted_cpu*np.pi/180
+                    yaw_predicted_cpu = yaw_predicted_cpu*np.pi/180
+                    
+                    for p,y,pl,yl in zip(pitch_predicted_cpu.cpu(),yaw_predicted_cpu.cpu(),label_pitch_cont_gaze,label_yaw_cont_gaze):
+                        avg_error_train += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
 
 
 
