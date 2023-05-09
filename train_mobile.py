@@ -244,7 +244,7 @@ if __name__ == '__main__':
                     pitch_predicted_cpu = pitch_predicted_cpu*np.pi/180
                     yaw_predicted_cpu = yaw_predicted_cpu*np.pi/180
                     
-                    for p,y,pl,yl in zip(pitch_predicted_cpu,yaw_predicted_cpu,label_pitch_cont_gaze,label_yaw_cont_gaze):
+                    for p,y,pl,yl in zip(pitch_predicted_cpu,yaw_predicted_cpu,label_pitch_cpu,label_yaw_cpu):
                         avg_error_train += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
 
 
