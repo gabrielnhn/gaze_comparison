@@ -196,7 +196,7 @@ if __name__ == '__main__':
                     yaw_predicted_cpu = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
                     label_pitch_cpu = cont_labels_gaze[:,0].float()*np.pi/180
                     label_pitch_cpu = label_pitch_cpu.cpu()
-                    label_yaw_cpu = cont_labels[:,1].float()*np.pi/180
+                    label_yaw_cpu = cont_labels_gaze[:,1].float()*np.pi/180
                     label_yaw_cpu = label_yaw_cpu.cpu()
 
                 pitch_predicted = \
