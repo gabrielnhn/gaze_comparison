@@ -194,6 +194,10 @@ if __name__ == '__main__':
                 with torch.no_grad():
                     pitch_predicted_cpu = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
                     yaw_predicted_cpu = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
+                    label_pitch_cpu = cont_labels_gaze[:,0].float()*np.pi/180
+                    label_pitch_cpu = label_pitch_cpu.cpu()
+                    label_yaw_cpu = cont_labels[:,1].float()*np.pi/180
+                    label_yaw_cpu = label_yaw_cpu.cpu()
 
                 pitch_predicted = \
                     torch.sum(pitch_predicted * idx_tensor, 1) * binwidth - 180
@@ -240,7 +244,7 @@ if __name__ == '__main__':
                     pitch_predicted_cpu = pitch_predicted_cpu*np.pi/180
                     yaw_predicted_cpu = yaw_predicted_cpu*np.pi/180
                     
-                    for p,y,pl,yl in zip(pitch_predicted_cpu.cpu(),yaw_predicted_cpu.cpu(),label_pitch_cont_gaze,label_yaw_cont_gaze):
+                    for p,y,pl,yl in zip(pitch_predicted_cpu,yaw_predicted_cpu,label_pitch_cont_gaze,label_yaw_cont_gaze):
                         avg_error_train += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
 
 
