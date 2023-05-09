@@ -169,7 +169,7 @@ if __name__ == '__main__':
             sum_loss_pitch_gaze = sum_loss_yaw_gaze = iter_gaze = 0
             
             for i, (images_gaze, labels_gaze, cont_labels_gaze,name) in enumerate(train_loader_gaze):
-                total_train += cont_labels.size(0)
+                total_train += cont_labels_gaze.size(0)
 
                 images_gaze = Variable(images_gaze).cuda(gpu)
                 
