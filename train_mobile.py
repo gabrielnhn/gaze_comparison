@@ -191,6 +191,10 @@ if __name__ == '__main__':
                 pitch_predicted = softmax(pitch)
                 yaw_predicted = softmax(yaw)
 
+
+                pitch_predicted_cpu = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
+                yaw_predicted_cpu = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
+
                 pitch_predicted = \
                     torch.sum(pitch_predicted * idx_tensor, 1) * binwidth - 180
                 yaw_predicted = \
@@ -234,7 +238,7 @@ if __name__ == '__main__':
 
 
                 
-                for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch_cont_gaze,label_yaw_cont_gaze):
+                for p,y,pl,yl in zip(pitch_predicted_cpu,yaw_predicted_cpu,label_pitch_cont_gaze,label_yaw_cont_gaze):
                     avg_error_train += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
 
 
