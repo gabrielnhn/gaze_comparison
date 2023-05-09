@@ -269,10 +269,10 @@ if __name__ == '__main__':
         plt.xlabel('epoch')
         plt.ylabel('avg')
         plt.title('Gaze angular error')
-        plt.legend()
         plt.plot(epoch_list, avg_MAE_test, color='b', label='test')
         plt.plot(epoch_list, avg_MAE_val, color='g', label='val')
 
+        plt.legend()
         # plt.locator_params(axis='x', nbins=30)
 
         fig.savefig(os.path.join(evalpath,data_set+".png"), format='png')

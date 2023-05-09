@@ -13,7 +13,6 @@ import torchvision
 
 import datasets
 from model import ML2CS, ML2CS180
-# from utils import select_device
 from utils import select_device, natural_keys, gazeto3d, angular
 import numpy as np
 
@@ -103,12 +102,6 @@ if __name__ == '__main__':
     ])
     
     if data_set=="gaze360":
-        # model, pre_url = getArch_weights(args.arch, 90)
-        # if args.snapshot == '':
-        #     load_filtered_state_dict(model, model_zoo.load_url(pre_url))
-        # else:
-        #     saved_state_dict = torch.load(args.snapshot)
-        #     model.load_state_dict(saved_state_dict)
 
         model = ML2CS180()
         model.cuda(gpu)
@@ -117,8 +110,6 @@ if __name__ == '__main__':
         binwidth = int(360/bins)
 
         print("BINWIDTH", binwidth)
-
-
 
         folder = os.listdir(args.gaze360label_dir_train)
         folder.sort()
@@ -133,22 +124,18 @@ if __name__ == '__main__':
             pin_memory=True)
 
         # # VALIDATION
-        # folder = os.listdir(args.gaze360label_dir_val)
-        # folder.sort()
-        # testlabelpathombined = [os.path.join(args.gaze360label_dir_val, j) for j in folder]
-        # gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 180, binwidth, train=False)
+        folder = os.listdir(args.gaze360label_dir_val)
+        folder.sort()
+        testlabelpathombined = [os.path.join(args.gaze360label_dir_val, j) for j in folder]
+        gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 180, binwidth)
         
-        # val_loader = torch.utils.data.DataLoader(
-        #     dataset=gaze_dataset_val,
-        #     batch_size=batch_size,
-        #     shuffle=False,
-        #     num_workers=4,
-        #     pin_memory=True)
+        val_loader = torch.utils.data.DataLoader(
+            dataset=gaze_dataset_val,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=4,
+            pin_memory=True)
         
-
-
-
-
 
         torch.backends.cudnn.benchmark = True
 
@@ -163,17 +150,9 @@ if __name__ == '__main__':
         softmax = nn.Softmax(dim=1).cuda(gpu)
         idx_tensor = [idx for idx in range(model.num_bins)]
         idx_tensor = Variable(torch.FloatTensor(idx_tensor)).cuda(gpu)
-
-        # Optimizer gaze
-        # optimizer_gaze = torch.optim.Adam([
-        #     {'params': get_ignored_params(model), 'lr': 0},
-        #     {'params': get_non_ignored_params(model), 'lr': args.lr},
-        #     {'params': get_fc_params(model), 'lr': args.lr}
-        # ], args.lr)
         
         optimizer_gaze = torch.optim.Adam(model.parameters(), args.lr)
 
-        # configuration = f"\ntrain configuration, gpu_id={args.gpu_id}, batch_size={batch_size}, model_arch={args.arch}\nStart testing dataset={data_set}, loader={len(train_loader_gaze)}------------------------- \n"
         configuration = f"\ntraining: batch_size={batch_size}\nStart testing dataset={data_set}, loader={len(train_loader_gaze)}------------------------- \n"
 
         print(configuration)
@@ -183,11 +162,15 @@ if __name__ == '__main__':
         for epoch in range(num_epochs):
             avg_error_train = 0
             avg_error_val = 0
+            total_train = 0
+            total_val = 0
 
 
             sum_loss_pitch_gaze = sum_loss_yaw_gaze = iter_gaze = 0
             
             for i, (images_gaze, labels_gaze, cont_labels_gaze,name) in enumerate(train_loader_gaze):
+                total_train += cont_labels.size(0)
+
                 images_gaze = Variable(images_gaze).cuda(gpu)
                 
                 # Binned labels
@@ -212,7 +195,6 @@ if __name__ == '__main__':
                     torch.sum(pitch_predicted * idx_tensor, 1) * binwidth - 180
                 yaw_predicted = \
                     torch.sum(yaw_predicted * idx_tensor, 1) * binwidth - 180
-
 
 
 
@@ -250,39 +232,48 @@ if __name__ == '__main__':
                         )
         
 
+
+                
+                for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch_cont_gaze,label_yaw_cont_gaze):
+                    avg_error_train += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
+
+
+
             # ##### VALIDATIONNNNNN
-            # with torch.no_grad(): 
-            #     for j, (images, labels, cont_labels, name) in enumerate(val_loader):
-            #         images = Variable(images).cuda(gpu)
-            #         # total += cont_labels.size(0)
+            with torch.no_grad(): 
+                for j, (images, labels, cont_labels, name) in enumerate(val_loader):
+                    total_val += cont_labels.size(0)
+                    images = Variable(images).cuda(gpu)
+                    # total += cont_labels.size(0)
 
-            #         label_pitch = cont_labels[:,0].float()*np.pi/180
-            #         label_yaw = cont_labels[:,1].float()*np.pi/180
+                    label_pitch = cont_labels[:,0].float()*np.pi/180
+                    label_yaw = cont_labels[:,1].float()*np.pi/180
                     
 
-            #         gaze_pitch, gaze_yaw = model(images)
+                    gaze_pitch, gaze_yaw = model(images)
                     
-            #         # Binned predictions
-            #         _, pitch_bpred = torch.max(gaze_pitch.data, 1)
-            #         _, yaw_bpred = torch.max(gaze_yaw.data, 1)
+                    # Binned predictions
+                    _, pitch_bpred = torch.max(gaze_pitch.data, 1)
+                    _, yaw_bpred = torch.max(gaze_yaw.data, 1)
                     
         
-            #         # Continuous predictions
-            #         pitch_predicted = softmax(gaze_pitch)
-            #         yaw_predicted = softmax(gaze_yaw)
+                    # Continuous predictions
+                    pitch_predicted = softmax(gaze_pitch)
+                    yaw_predicted = softmax(gaze_yaw)
                     
-            #         # mapping from binned (0 to 28) to angels (-180 to 180)  
-            #         pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
-            #         yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
+                    # mapping from binned (0 to 28) to angels (-180 to 180)  
+                    pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
+                    yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
 
-            #         pitch_predicted = pitch_predicted*np.pi/180
-            #         yaw_predicted = yaw_predicted*np.pi/180
+                    pitch_predicted = pitch_predicted*np.pi/180
+                    yaw_predicted = yaw_predicted*np.pi/180
 
-            #         for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
-            #             avg_error_val += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
+                    for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
+                        avg_error_val += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
                     
 
-            #     avg_MAE_val.append(avg_error_val)
+            avg_MAE_val.append(avg_error_val/total_val)
+            avg_MAE_train.append(avg_error_train/total_train)
           
 
             if epoch % 1 == 0 and epoch < num_epochs:
@@ -299,12 +290,12 @@ if __name__ == '__main__':
         fig = plt.figure()        
         plt.xlabel('epoch')
         plt.ylabel('avg')
-        plt.title('Gaze angular error')
-        plt.legend()
-        # plt.plot(epoch_list, avg_MAE_train, color='b', label='train')
+        plt.title('Mean angular error')
+        plt.plot(epoch_list, avg_MAE_train, color='b', label='train')
         plt.plot(epoch_list, avg_MAE_val, color='g', label='val')
 
-        pyplot.locator_params(axis='x', nbins=40)
+        plt.legend(loc="upper left")
+        pyplot.locator_params(axis='x', nbins=num_epochs//3)
 
         fig.savefig(os.path.join(output,data_set+".png"), format='png')
         # plt.show()
