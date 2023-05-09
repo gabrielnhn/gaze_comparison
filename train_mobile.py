@@ -191,9 +191,9 @@ if __name__ == '__main__':
                 pitch_predicted = softmax(pitch)
                 yaw_predicted = softmax(yaw)
 
-
-                pitch_predicted_cpu = torch.sum(pitch_predicted * idx_tensor, 1).detach().cpu() * binwidth - 180
-                yaw_predicted_cpu = torch.sum(yaw_predicted * idx_tensor, 1).detach().cpu() * binwidth - 180
+                with torch.no_grad():
+                    pitch_predicted_cpu = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
+                    yaw_predicted_cpu = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
 
                 pitch_predicted = \
                     torch.sum(pitch_predicted * idx_tensor, 1) * binwidth - 180
