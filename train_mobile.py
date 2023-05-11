@@ -17,31 +17,25 @@ from utils import select_device, natural_keys, gazeto3d, angular
 import numpy as np
 
 import matplotlib.pyplot as plt
-
+from datetime import datetime
 
 def parse_args():
     """Parse input arguments."""
+    
+    # DATASET ARGS
     parser = argparse.ArgumentParser(description='Gaze estimation using L2CSNet.')
-    # Gaze360
     parser.add_argument(
         '--gaze360image_dir_train', dest='gaze360image_dir_train', help='Directory path for gaze images.',
         default='../gaze360_train/Image', type=str)
     parser.add_argument(
         '--gaze360label_dir_train', dest='gaze360label_dir_train', help='Directory path for gaze labels.',
-        default='../gaze360_train/Label', type=str)
-   
+        default='../gaze360_train/Label', type=str)   
     parser.add_argument(
         '--gaze360image_dir_val', dest='gaze360image_dir_val', help='Directory path for gaze images.',
         default='../gaze360_val/Image', type=str)
     parser.add_argument(
         '--gaze360label_dir_val', dest='gaze360label_dir_val', help='Directory path for gaze labels.',
         default='../gaze360_val/Label', type=str)
-   
-    
-    
-    
-    # Important args -------------------------------------------------------------------------------------------------------
-    # ----------------------------------------------------------------------------------------------------------------------
     parser.add_argument(
         '--dataset', dest='dataset', help='mpiigaze, rtgene, gaze360, ethgaze',
         default= "gaze360", type=str)
@@ -54,6 +48,9 @@ def parse_args():
     parser.add_argument(
         '--gpu', dest='gpu_id', help='GPU device id to use [0] or multiple 0,1,2,3',
         default='0', type=str)
+
+    ## MODEL ARGS
+    
     parser.add_argument(
         '--num_epochs', dest='num_epochs', help='Maximum number of training epochs.',
         default=60, type=int)
@@ -72,15 +69,6 @@ def parse_args():
     return args
 
 
-
-def load_filtered_state_dict(model, snapshot):
-    # By user apaszke from discuss.pytorch.org
-    model_dict = model.state_dict()
-    snapshot = {k: v for k, v in snapshot.items() if k in model_dict}
-    model_dict.update(snapshot)
-    model.load_state_dict(model_dict)
-
-
 if __name__ == '__main__':
     args = parse_args()
     cudnn.enabled = True
@@ -89,11 +77,11 @@ if __name__ == '__main__':
     gpu = select_device(args.gpu_id, batch_size=args.batch_size)
     data_set=args.dataset
     alpha = args.alpha
-    output=args.output
-    
+    output=args.output    
     
     transformations = transforms.Compose([
-        transforms.Resize(448),
+        # transforms.Resize(448),
+        transforms.Resize(224),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406],
@@ -223,7 +211,6 @@ if __name__ == '__main__':
                 optimizer_gaze.zero_grad(set_to_none=True)
                 torch.autograd.backward(loss_seq, grad_seq)
                 optimizer_gaze.step()
-                # scheduler.step()
                 iter_gaze += 1
                 
 
@@ -247,18 +234,14 @@ if __name__ == '__main__':
                     for p,y,pl,yl in zip(pitch_predicted_cpu,yaw_predicted_cpu,label_pitch_cpu,label_yaw_cpu):
                         avg_error_train += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
 
-
-
             # ##### VALIDATIONNNNNN
             with torch.no_grad(): 
                 for j, (images, labels, cont_labels, name) in enumerate(val_loader):
                     total_val += cont_labels.size(0)
                     images = Variable(images).cuda(gpu)
-                    # total += cont_labels.size(0)
 
                     label_pitch = cont_labels[:,0].float()*np.pi/180
                     label_yaw = cont_labels[:,1].float()*np.pi/180
-                    
 
                     gaze_pitch, gaze_yaw = model(images)
                     
@@ -293,19 +276,16 @@ if __name__ == '__main__':
                                 '_epoch_' + str(epoch+1) + '.pkl')
                     )
             
-
-
         epoch_list = list(range(num_epochs))
         
         fig = plt.figure()        
-        plt.xlabel('epoch')
-        plt.ylabel('avg')
+        plt.xlabel('Epoch')
+        plt.ylabel('MAE (degrees)')
         plt.title('Mean angular error')
         plt.plot(epoch_list, avg_MAE_train, color='b', label='train')
-        plt.plot(epoch_list, avg_MAE_val, color='g', label='val')
+        plt.plot(epoch_list, avg_MAE_val, color='g', label='validation')
 
         plt.legend(loc="upper left")
         plt.locator_params(axis='x', nbins=num_epochs//3)
-
         fig.savefig(os.path.join(output,data_set+".png"), format='png')
         # plt.show()
