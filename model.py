@@ -105,8 +105,8 @@ class ML2CS180(nn.Module):
         self.backbone = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1').features
 
 
-        self.fc_yaw_gaze = nn.Linear(1280, num_bins)
-        self.fc_pitch_gaze = nn.Linear(1280, num_bins)
+        self.fc_yaw_gaze = nn.Linear(1280, self.num_bins)
+        self.fc_pitch_gaze = nn.Linear(1280, self.num_bins)
         
         # self.fc_yaw_gaze = nn.Linear(1000, self.num_bins)
         # self.fc_pitch_gaze = nn.Linear(1000, self.num_bins)
