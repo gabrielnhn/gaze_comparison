@@ -104,6 +104,7 @@ class ML2CS180(nn.Module):
         # self.backbone = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
         self.backbone = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1').features
 
+        
 
         self.fc_yaw_gaze = nn.Linear(1280, self.num_bins)
         self.fc_pitch_gaze = nn.Linear(1280, self.num_bins)
@@ -114,6 +115,13 @@ class ML2CS180(nn.Module):
 
     def forward(self, x):
         x = self.backbone(x)
+
+        # straight from https://github.com/pytorch/vision/blob/main/torchvision/models/mobilenetv2.py
+
+        x = nn.functional.adaptive_avg_pool2d(x, (1, 1))
+        x = torch.flatten(x, 1)
+        # x = self.classifier(x)
+
         # gaze
         pre_yaw_gaze =  self.fc_yaw_gaze(x)
         pre_pitch_gaze = self.fc_pitch_gaze(x)
