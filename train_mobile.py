@@ -305,7 +305,7 @@ if __name__ == '__main__':
         plt.plot(epoch_list, avg_MAE_val, color='g', label='val')
 
         plt.legend(loc="upper left")
-        pyplot.locator_params(axis='x', nbins=num_epochs//3)
+        plt.locator_params(axis='x', nbins=num_epochs//3)
 
         fig.savefig(os.path.join(output,data_set+".png"), format='png')
         # plt.show()
