@@ -127,7 +127,9 @@ if __name__ == '__main__':
 
         torch.backends.cudnn.benchmark = True
 
-        summary_name = '{}_{}'.format('ML2CS-gaze360-', int(time.time()))
+        day = datetime.now().day
+        month = datetime.now().month
+        summary_name = f"ML2CS{bins}-{month}-{day}"
         output=os.path.join(output, summary_name)
         if not os.path.exists(output):
             os.makedirs(output)
@@ -141,24 +143,23 @@ if __name__ == '__main__':
         
         optimizer_gaze = torch.optim.Adam(model.parameters(), args.lr)
 
-        configuration = f"\ntraining: batch_size={batch_size}\nStart testing dataset={data_set}, loader={len(train_loader_gaze)}------------------------- \n"
-
-        print(configuration)
-
         avg_MAE_train=[]
         avg_MAE_val=[]
+
+        best_val_loss = float("inf")
+        best_val_epoch = None
+        best_model = None
+
         for epoch in range(num_epochs):
             avg_error_train = 0
             avg_error_val = 0
             total_train = 0
             total_val = 0
 
-
             sum_loss_pitch_gaze = sum_loss_yaw_gaze = iter_gaze = 0
             
             for i, (images_gaze, labels_gaze, cont_labels_gaze,name) in enumerate(train_loader_gaze):
                 total_train += cont_labels_gaze.size(0)
-
                 images_gaze = Variable(images_gaze).cuda(gpu)
                 
                 # Binned labels
@@ -192,8 +193,6 @@ if __name__ == '__main__':
                 yaw_predicted = \
                     torch.sum(yaw_predicted * idx_tensor, 1) * binwidth - 180
 
-
-
                 loss_reg_pitch = reg_criterion(
                     pitch_predicted, label_pitch_cont_gaze)
                 loss_reg_yaw = reg_criterion(
@@ -213,7 +212,6 @@ if __name__ == '__main__':
                 optimizer_gaze.step()
                 iter_gaze += 1
                 
-
                 if (i+1) % 100 == 0:
                     print('Epoch [%d/%d], Iter [%d/%d] Losses: '
                         'Gaze Yaw %.4f,Gaze Pitch %.4f' % (
@@ -225,16 +223,17 @@ if __name__ == '__main__':
                             sum_loss_yaw_gaze/iter_gaze
                         )
                         )
-        
+            
 
                 with torch.no_grad():
                     pitch_predicted_cpu = pitch_predicted_cpu*np.pi/180
-                    yaw_predicted_cpu = yaw_predicted_cpu*np.pi/180
-                    
+                    yaw_predicted_cpu = yaw_predicted_cpu*np.pi/180 
+
                     for p,y,pl,yl in zip(pitch_predicted_cpu,yaw_predicted_cpu,label_pitch_cpu,label_yaw_cpu):
                         avg_error_train += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
 
-            # ##### VALIDATIONNNNNN
+
+            # VALIDATION
             with torch.no_grad(): 
                 for j, (images, labels, cont_labels, name) in enumerate(val_loader):
                     total_val += cont_labels.size(0)
@@ -249,7 +248,6 @@ if __name__ == '__main__':
                     _, pitch_bpred = torch.max(gaze_pitch.data, 1)
                     _, yaw_bpred = torch.max(gaze_yaw.data, 1)
                     
-        
                     # Continuous predictions
                     pitch_predicted = softmax(gaze_pitch)
                     yaw_predicted = softmax(gaze_yaw)
@@ -269,13 +267,31 @@ if __name__ == '__main__':
             avg_MAE_train.append(avg_error_train/total_train)
           
 
-            if epoch % 1 == 0 and epoch < num_epochs:
-                print('Taking snapshot...',
-                    torch.save(model.state_dict(),
-                                output +'/'+
-                                '_epoch_' + str(epoch+1) + '.pkl')
-                    )
+            val_loss = (avg_error_val/total_val)
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                best_val_epoch = epoch
+                best_model = model
+
+
+
+            # if epoch % 1 == 0 and epoch < num_epochs:
+            #     print('Taking snapshot...',
+            #         torch.save(model.state_dict(),
+            #                     output +'/'+
+            #                     '_epoch_' + str(epoch+1) + '.pkl')
+            #         )
             
+
+        print(F'BEST EPOCH: {best_val_epoch}')
+        print(F'BEST LOSS: {best_val_loss}')
+        print("Saving best model...")
+        torch.save(best_model.state_dict(), output +'/'+'_epoch_' + str(best_val_epoch) + '.pkl')
+        print("Saved")
+
+
+        
+        print("Generating plot..")
         epoch_list = list(range(num_epochs))
         
         fig = plt.figure()        
