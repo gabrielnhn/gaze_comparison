@@ -24,17 +24,17 @@ def parse_args():
      # Gaze360
     parser.add_argument(
         '--gaze360image_dir_test', dest='gaze360image_dir_test', help='Directory path for gaze images.',
-        default='datasets/Gaze360/Image', type=str)
+        default='../gaze360_test/Label', type=str)
     parser.add_argument(
         '--gaze360label_dir_test', dest='gaze360label_dir_test', help='Directory path for gaze labels.',
-        default='datasets/Gaze360/Label/test.label', type=str)
+        default='../gaze360_test/Label', type=str)
    
     parser.add_argument(
         '--gaze360image_dir_val', dest='gaze360image_dir_val', help='Directory path for gaze images.',
-        default='datasets/Gaze360/Image', type=str)
+        default='../gaze360_val/Image', type=str)
     parser.add_argument(
         '--gaze360label_dir_val', dest='gaze360label_dir_val', help='Directory path for gaze labels.',
-        default='datasets/Gaze360/Label/test.label', type=str)
+        default='../gaze360_val/Label', type=str)
    
    
    
