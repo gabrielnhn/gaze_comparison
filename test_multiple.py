@@ -235,11 +235,6 @@ if __name__ == '__main__':
                         
 
                         gaze_pitch, gaze_yaw = model(images)
-                        
-                        # Binned predictions
-                        _, pitch_bpred = torch.max(gaze_pitch.data, 1)
-                        _, yaw_bpred = torch.max(gaze_yaw.data, 1)
-                        
             
                         # Continuous predictions
                         pitch_predicted = softmax(gaze_pitch)
