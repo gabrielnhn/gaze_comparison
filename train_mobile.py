@@ -212,7 +212,7 @@ if __name__ == '__main__':
                 optimizer_gaze.step()
                 iter_gaze += 1
                 
-                if (i+1) % 100 == 0:
+                if (i+1) % 400 == 0:
                     print('Epoch [%d/%d], Iter [%d/%d] Losses: '
                         'Gaze Yaw %.4f,Gaze Pitch %.4f' % (
                             epoch+1,
@@ -226,8 +226,8 @@ if __name__ == '__main__':
             
 
                 with torch.no_grad():
-                    pitch_predicted_cpu = pitch_predicted_cpu*np.pi/180
-                    yaw_predicted_cpu = yaw_predicted_cpu*np.pi/180 
+                    # pitch_predicted_cpu = pitch_predicted_cpu*np.pi/180
+                    # yaw_predicted_cpu = yaw_predicted_cpu*np.pi/180 
 
                     for p,y,pl,yl in zip(pitch_predicted_cpu,yaw_predicted_cpu,label_pitch_cpu,label_yaw_cpu):
                         avg_error_train += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
@@ -243,10 +243,6 @@ if __name__ == '__main__':
                     label_yaw = cont_labels[:,1].float()*np.pi/180
 
                     gaze_pitch, gaze_yaw = model(images)
-                    
-                    # Binned predictions
-                    _, pitch_bpred = torch.max(gaze_pitch.data, 1)
-                    _, yaw_bpred = torch.max(gaze_yaw.data, 1)
                     
                     # Continuous predictions
                     pitch_predicted = softmax(gaze_pitch)
