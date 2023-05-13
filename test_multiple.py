@@ -1,4 +1,5 @@
-import os, argparse
+import os
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
@@ -36,15 +37,6 @@ def parse_args():
         '--gaze360label_dir_val', dest='gaze360label_dir_val', help='Directory path for gaze labels.',
         default='../gaze360_val/Label', type=str)
    
-   
-   
-    # mpiigaze
-    parser.add_argument(
-        '--gazeMpiimage_dir', dest='gazeMpiimage_dir', help='Directory path for gaze images.',
-        default='datasets/MPIIFaceGaze/Image', type=str)
-    parser.add_argument(
-        '--gazeMpiilabel_dir', dest='gazeMpiilabel_dir', help='Directory path for gaze labels.',
-        default='datasets/MPIIFaceGaze/Label', type=str)
     # Important args -------------------------------------------------------------------------------------------------------
     # ----------------------------------------------------------------------------------------------------------------------
     parser.add_argument(
@@ -73,23 +65,6 @@ def parse_args():
     return args
 
 
-def getArch(arch,bins):
-    # Base network structure
-    if arch == 'ResNet18':
-        model = L2CS( torchvision.models.resnet.BasicBlock,[2, 2,  2, 2], bins)
-    elif arch == 'ResNet34':
-        model = L2CS( torchvision.models.resnet.BasicBlock,[3, 4,  6, 3], bins)
-    elif arch == 'ResNet101':
-        model = L2CS( torchvision.models.resnet.Bottleneck,[3, 4, 23, 3], bins)
-    elif arch == 'ResNet152':
-        model = L2CS( torchvision.models.resnet.Bottleneck,[3, 8, 36, 3], bins)
-    else:
-        if arch != 'ResNet50':
-            print('Invalid value for architecture is passed! '
-                'The default value of ResNet50 will be used instead!')
-        model = L2CS( torchvision.models.resnet.Bottleneck, [3, 4, 6,  3], bins)
-    return model
-
 if __name__ == '__main__':
     args = parse_args()
     cudnn.enabled = True
@@ -112,11 +87,6 @@ if __name__ == '__main__':
             std=[0.229, 0.224, 0.225]
         )
     ])
-
-
-
-
-
 
     binwidth = int(360/180)
     
@@ -178,25 +148,21 @@ if __name__ == '__main__':
 
                 bins = model.num_bins
                 binwidth = int(360/bins)
-
-
-
+                idx_tensor = [idx for idx in range(bins)]
+                idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
                 
                 ## TEST
                 with torch.no_grad():           
                     total = 0
-                    idx_tensor = [idx for idx in range(bins)]
-                    idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
                     avg_error = .0
                     for j, (images, labels, cont_labels, name) in enumerate(test_loader):
                         images = Variable(images).cuda(gpu)
                         total += cont_labels.size(0)
 
-                        label_pitch = cont_labels[:,0].float()*np.pi/180
-                        label_yaw = cont_labels[:,1].float()*np.pi/180
-                        
+                        label_yaw = cont_labels[:,0].float()*np.pi/180
+                        label_pitch = cont_labels[:,1].float()*np.pi/180
 
-                        gaze_pitch, gaze_yaw = model(images)
+                        gaze_yaw, gaze_pitch = model(images)
                         
                         # Binned predictions
                         _, pitch_bpred = torch.max(gaze_pitch.data, 1)
@@ -223,8 +189,8 @@ if __name__ == '__main__':
                 ## VALIDATION        
                 with torch.no_grad():
                     total = 0
-                    idx_tensor = [idx for idx in range(bins)]
-                    idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
+                    # idx_tensor = [idx for idx in range(bins)]
+                    # idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
                     avg_error = .0        
                     for j, (images, labels, cont_labels, name) in enumerate(val_loader):
                         images = Variable(images).cuda(gpu)

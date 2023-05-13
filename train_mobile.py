@@ -18,6 +18,7 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 from datetime import datetime
+from calendar import month_name
 
 def parse_args():
     """Parse input arguments."""
@@ -99,6 +100,7 @@ if __name__ == '__main__':
 
         print("BINWIDTH", binwidth)
 
+        # TRAIN
         folder = os.listdir(args.gaze360label_dir_train)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_train, j) for j in folder] 
@@ -125,21 +127,20 @@ if __name__ == '__main__':
             pin_memory=True)
         
 
-        torch.backends.cudnn.benchmark = True
+        # torch.backends.cudnn.benchmark = True
 
         day = datetime.now().day
         month = datetime.now().month
-        summary_name = f"ML2CS{bins}-{month}-{day}"
+        summary_name = f"ML2CS{bins}-{month_name[month]}-{day}"
         output=os.path.join(output, summary_name)
         if not os.path.exists(output):
             os.makedirs(output)
-
         
         criterion = nn.CrossEntropyLoss().cuda(gpu)
         reg_criterion = nn.MSELoss().cuda(gpu)
         softmax = nn.Softmax(dim=1).cuda(gpu)
         idx_tensor = [idx for idx in range(model.num_bins)]
-        idx_tensor = Variable(torch.FloatTensor(idx_tensor)).cuda(gpu)
+        idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
         
         optimizer_gaze = torch.optim.Adam(model.parameters(), args.lr)
 
@@ -148,13 +149,15 @@ if __name__ == '__main__':
 
         best_val_loss = float("inf")
         best_val_epoch = None
-        best_model = None
+        best_val_model = None
+        
+        best_train_loss = float("inf")
+        best_train_epoch = None
+        best_train_model = None
 
         for epoch in range(num_epochs):
-            avg_error_train = 0
-            avg_error_val = 0
+            avg_error_train = 0.0
             total_train = 0
-            total_val = 0
 
             sum_loss_pitch_gaze = sum_loss_yaw_gaze = iter_gaze = 0
             
@@ -163,14 +166,14 @@ if __name__ == '__main__':
                 images_gaze = Variable(images_gaze).cuda(gpu)
                 
                 # Binned labels
-                label_pitch_gaze = Variable(labels_gaze[:, 0]).cuda(gpu)
-                label_yaw_gaze = Variable(labels_gaze[:, 1]).cuda(gpu)
+                label_yaw_gaze = Variable(labels_gaze[:, 0]).cuda(gpu)
+                label_pitch_gaze = Variable(labels_gaze[:, 1]).cuda(gpu)
 
                 # Continuous labels
-                label_pitch_cont_gaze = Variable(cont_labels_gaze[:, 0]).cuda(gpu)
-                label_yaw_cont_gaze = Variable(cont_labels_gaze[:, 1]).cuda(gpu)
+                label_pitch_cont_gaze = Variable(cont_labels_gaze[:, 1]).cuda(gpu)
+                label_yaw_cont_gaze = Variable(cont_labels_gaze[:, 0]).cuda(gpu)
 
-                pitch, yaw = model(images_gaze)
+                yaw, pitch = model(images_gaze)
 
                 # Cross entropy loss
                 loss_pitch_gaze = criterion(pitch, label_pitch_gaze)
@@ -183,20 +186,16 @@ if __name__ == '__main__':
                 with torch.no_grad():
                     pitch_predicted_cpu = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
                     yaw_predicted_cpu = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
-                    label_pitch_cpu = cont_labels_gaze[:,0].float()*np.pi/180
+                    label_pitch_cpu = cont_labels_gaze[:,1].float()*np.pi/180
                     label_pitch_cpu = label_pitch_cpu.cpu()
-                    label_yaw_cpu = cont_labels_gaze[:,1].float()*np.pi/180
+                    label_yaw_cpu = cont_labels_gaze[:,0].float()*np.pi/180
                     label_yaw_cpu = label_yaw_cpu.cpu()
 
-                pitch_predicted = \
-                    torch.sum(pitch_predicted * idx_tensor, 1) * binwidth - 180
-                yaw_predicted = \
-                    torch.sum(yaw_predicted * idx_tensor, 1) * binwidth - 180
+                pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1) * binwidth - 180
+                yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1) * binwidth - 180
 
-                loss_reg_pitch = reg_criterion(
-                    pitch_predicted, label_pitch_cont_gaze)
-                loss_reg_yaw = reg_criterion(
-                    yaw_predicted, label_yaw_cont_gaze)
+                loss_reg_pitch = reg_criterion(pitch_predicted, label_pitch_cont_gaze)
+                loss_reg_yaw = reg_criterion(yaw_predicted, label_yaw_cont_gaze)
 
                 # Total loss
                 loss_pitch_gaze += alpha * loss_reg_pitch
@@ -235,6 +234,8 @@ if __name__ == '__main__':
 
             # VALIDATION
             with torch.no_grad(): 
+                avg_error_val = 0.0
+                total_val = 0
                 for j, (images, labels, cont_labels, name) in enumerate(val_loader):
                     total_val += cont_labels.size(0)
                     images = Variable(images).cuda(gpu)
@@ -258,16 +259,22 @@ if __name__ == '__main__':
                     for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
                         avg_error_val += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
                     
+            val_loss = (avg_error_val/total_val)
+            train_loss = (avg_error_train/total_train)
 
-            avg_MAE_val.append(avg_error_val/total_val)
-            avg_MAE_train.append(avg_error_train/total_train)
+            avg_MAE_val.append(val_loss)
+            avg_MAE_train.append(train_loss)
           
 
-            val_loss = (avg_error_val/total_val)
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 best_val_epoch = epoch
-                best_model = model
+                best_val_model = model
+            
+            if train_loss < best_train_loss:
+                best_train_loss = train_loss
+                best_train_epoch = epoch
+                best_train_model = model
 
 
 
@@ -279,13 +286,17 @@ if __name__ == '__main__':
             #         )
             
 
-        print(F'BEST EPOCH: {best_val_epoch}')
-        print(F'BEST LOSS: {best_val_loss}')
+        print(F'BEST EPOCH (VAL): {best_val_epoch}')
+        print(F'BEST LOSS (VAL): {best_val_loss}')
         print("Saving best model...")
-        torch.save(best_model.state_dict(), output +'/'+'_epoch_' + str(best_val_epoch) + '.pkl')
+        torch.save(best_val_model.state_dict(), output +'/'+'_epoch_' + str(best_val_epoch) + '.pkl')
         print("Saved")
 
-
+        print(F'BEST EPOCH (train): {best_train_epoch}')
+        print(F'BEST LOSS (train): {best_train_loss}')
+        print("Saving best model...")
+        torch.save(best_train_model.state_dict(), output +'/'+'_epoch_' + str(best_train_epoch) + '.pkl')
+        print("Saved")
         
         print("Generating plot..")
         epoch_list = list(range(num_epochs))
