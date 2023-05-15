@@ -156,12 +156,14 @@ if __name__ == '__main__':
         best_train_epoch = None
         best_train_model = None
 
+
         for epoch in range(num_epochs):
             avg_error_train = 0.0
             total_train = 0
 
             sum_loss_pitch_gaze = sum_loss_yaw_gaze = iter_gaze = 0
             
+            model.train()
             for i, (images_gaze, labels_gaze, cont_labels_gaze,name) in enumerate(train_loader_gaze):
                 total_train += cont_labels_gaze.size(0)
                 images_gaze = Variable(images_gaze).cuda(gpu)
@@ -260,6 +262,8 @@ if __name__ == '__main__':
             #         for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
             #             avg_error_val += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
             ## VALIDATION        
+
+            model.eval()
             with torch.no_grad():
                 total = 0
                 # idx_tensor = [idx for idx in range(bins)]
