@@ -139,6 +139,7 @@ if __name__ == '__main__':
         criterion = nn.CrossEntropyLoss().cuda(gpu)
         reg_criterion = nn.MSELoss().cuda(gpu)
         softmax = nn.Softmax(dim=1).cuda(gpu)
+
         idx_tensor = [idx for idx in range(model.num_bins)]
         idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
         
@@ -232,19 +233,48 @@ if __name__ == '__main__':
                         avg_error_train += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
 
 
-            # VALIDATION
-            with torch.no_grad(): 
-                avg_error_val = 0.0
-                total_val = 0
+            # # VALIDATION
+            # with torch.no_grad(): 
+            #     avg_error_val = 0.0
+            #     total_val = 0
+            #     for j, (images, labels, cont_labels, name) in enumerate(val_loader):
+            #         images = Variable(images).cuda(gpu)
+            #         total_val += cont_labels.size(0)
+
+            #         label_yaw = cont_labels[:,0].float()*np.pi/180
+            #         label_pitch = cont_labels[:,1].float()*np.pi/180
+
+            #         gaze_yaw, gaze_pitch = model(images)
+                    
+            #         # Continuous predictions
+            #         pitch_predicted = softmax(gaze_pitch)
+            #         yaw_predicted = softmax(gaze_yaw)
+                    
+            #         # mapping from binned (0 to 28) to angels (-180 to 180)  
+            #         pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
+            #         yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
+
+            #         pitch_predicted = pitch_predicted*np.pi/180
+            #         yaw_predicted = yaw_predicted*np.pi/180
+
+            #         for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
+            #             avg_error_val += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
+            ## VALIDATION        
+            with torch.no_grad():
+                total = 0
+                # idx_tensor = [idx for idx in range(bins)]
+                # idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
+                avg_error = .0        
                 for j, (images, labels, cont_labels, name) in enumerate(val_loader):
                     images = Variable(images).cuda(gpu)
-                    total_val += cont_labels.size(0)
+                    total += cont_labels.size(0)
 
                     label_yaw = cont_labels[:,0].float()*np.pi/180
                     label_pitch = cont_labels[:,1].float()*np.pi/180
+                    
 
                     gaze_yaw, gaze_pitch = model(images)
-                    
+        
                     # Continuous predictions
                     pitch_predicted = softmax(gaze_pitch)
                     yaw_predicted = softmax(gaze_yaw)
@@ -257,9 +287,11 @@ if __name__ == '__main__':
                     yaw_predicted = yaw_predicted*np.pi/180
 
                     for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
-                        avg_error_val += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
+                        avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
                     
-            val_loss = (avg_error_val/total_val)
+            val_loss = avg_error/total
+                    
+            # val_loss = (avg_error_val/total_val)
             train_loss = (avg_error_train/total_train)
 
             avg_MAE_val.append(val_loss)
