@@ -237,13 +237,13 @@ if __name__ == '__main__':
                 avg_error_val = 0.0
                 total_val = 0
                 for j, (images, labels, cont_labels, name) in enumerate(val_loader):
-                    total_val += cont_labels.size(0)
                     images = Variable(images).cuda(gpu)
+                    total_val += cont_labels.size(0)
 
-                    label_pitch = cont_labels[:,0].float()*np.pi/180
-                    label_yaw = cont_labels[:,1].float()*np.pi/180
+                    label_yaw = cont_labels[:,0].float()*np.pi/180
+                    label_pitch = cont_labels[:,1].float()*np.pi/180
 
-                    gaze_pitch, gaze_yaw = model(images)
+                    gaze_yaw, gaze_pitch = model(images)
                     
                     # Continuous predictions
                     pitch_predicted = softmax(gaze_pitch)
@@ -275,15 +275,6 @@ if __name__ == '__main__':
                 best_train_loss = train_loss
                 best_train_epoch = epoch
                 best_train_model = model
-
-
-
-            # if epoch % 1 == 0 and epoch < num_epochs:
-            #     print('Taking snapshot...',
-            #         torch.save(model.state_dict(),
-            #                     output +'/'+
-            #                     '_epoch_' + str(epoch+1) + '.pkl')
-            #         )
             
 
         print(F'BEST EPOCH (VAL): {best_val_epoch}')

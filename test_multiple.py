@@ -110,7 +110,9 @@ if __name__ == '__main__':
         folder = os.listdir(args.gaze360label_dir_val)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_val, j) for j in folder]
-        gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, angle, binwidth, train=True)
+        # gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, angle, binwidth, train=True)
+        gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 180, binwidth)
+
         
         val_loader = torch.utils.data.DataLoader(
             dataset=gaze_dataset_val,
@@ -146,8 +148,8 @@ if __name__ == '__main__':
                 model.cuda(gpu)
                 model.eval()
 
-                bins = model.num_bins
-                binwidth = int(360/bins)
+                # bins = model.num_bins
+                # binwidth = int(360/bins)
                 idx_tensor = [idx for idx in range(bins)]
                 idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
                 
@@ -196,11 +198,11 @@ if __name__ == '__main__':
                         images = Variable(images).cuda(gpu)
                         total += cont_labels.size(0)
 
-                        label_pitch = cont_labels[:,0].float()*np.pi/180
-                        label_yaw = cont_labels[:,1].float()*np.pi/180
+                        label_yaw = cont_labels[:,0].float()*np.pi/180
+                        label_pitch = cont_labels[:,1].float()*np.pi/180
                         
 
-                        gaze_pitch, gaze_yaw = model(images)
+                        gaze_yaw, gaze_pitch = model(images)
             
                         # Continuous predictions
                         pitch_predicted = softmax(gaze_pitch)
