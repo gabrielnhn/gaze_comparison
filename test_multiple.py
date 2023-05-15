@@ -25,7 +25,7 @@ def parse_args():
      # Gaze360
     parser.add_argument(
         '--gaze360image_dir_test', dest='gaze360image_dir_test', help='Directory path for gaze images.',
-        default='../gaze360_test/Label', type=str)
+        default='../gaze360_test/Image', type=str)
     parser.add_argument(
         '--gaze360label_dir_test', dest='gaze360label_dir_test', help='Directory path for gaze labels.',
         default='../gaze360_test/Label', type=str)
