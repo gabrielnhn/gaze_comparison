@@ -148,7 +148,7 @@ if __name__ == '__main__':
                 model.cuda(gpu)
                 model.eval()
 
-                # bins = model.num_bins
+                bins = model.num_bins
                 # binwidth = int(360/bins)
                 idx_tensor = [idx for idx in range(bins)]
                 idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
