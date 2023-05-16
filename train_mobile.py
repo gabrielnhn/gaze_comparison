@@ -143,7 +143,7 @@ if __name__ == '__main__':
         idx_tensor = [idx for idx in range(model.num_bins)]
         idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
         
-        optimizer_gaze = torch.optim.Adam(model.parameters(), args.lr)
+        optimizer_gaze = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), args.lr)
 
         avg_MAE_train=[]
         avg_MAE_val=[]
@@ -156,7 +156,7 @@ if __name__ == '__main__':
         best_train_epoch = None
         best_train_model = None
 
-
+        all_models = []
         for epoch in range(num_epochs):
             avg_error_train = 0.0
             total_train = 0
@@ -301,6 +301,7 @@ if __name__ == '__main__':
             avg_MAE_val.append(val_loss)
             avg_MAE_train.append(train_loss)
           
+            all_models.append((model, val_loss, train_loss, epoch))
 
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
@@ -339,3 +340,15 @@ if __name__ == '__main__':
         plt.locator_params(axis='x', nbins=num_epochs//3)
         fig.savefig(os.path.join(output,data_set+".png"), format='png')
         # plt.show()
+
+
+        # save top10 val
+        all_models.sort(key=lambda x: -x[1])
+
+        for good_model in all_models[:10]:
+            epoch = good_model[-1]
+            model = good_model[0]
+
+            if (epoch != best_val_epoch) and (epoch != best_train_epoch):
+                torch.save(model.state_dict(), output +'/'+'_epoch_' + str(epoch) + '.pkl')
+            

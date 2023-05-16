@@ -102,8 +102,9 @@ class ML2CS180(nn.Module):
         super(ML2CS180, self).__init__()
         # self.backbone = torchvision.models.mobilenet_v2().features
         # self.backbone = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
-        self.backbone = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1').features
-
+        self.backbone = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V2').features
+        for param in self.backbone.parameters():
+            param.requires_grad = False
         
 
         self.fc_yaw_gaze = nn.Linear(1280, self.num_bins)
