@@ -112,8 +112,8 @@ class ML2CS180(nn.Module):
         classifier_dict = mobilenet_v2.classifier.state_dict()
         classifier_dict["weight"] = classifier_dict["1.weight"]
         classifier_dict["bias"] = classifier_dict["1.bias"]
-        classifier_dict.remove("1.weight")
-        classifier_dict.remove("1.bias")
+        # classifier_dict.remove("1.weight")
+        # classifier_dict.remove("1.bias")
 
         self.fc_yaw_gaze = nn.Linear(1280, self.num_bins)
 
