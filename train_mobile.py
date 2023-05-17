@@ -301,29 +301,29 @@ if __name__ == '__main__':
             avg_MAE_val.append(val_loss)
             avg_MAE_train.append(train_loss)
           
-            all_models.append((model, val_loss, train_loss, epoch))
+            all_models.append((model.state_dict(), val_loss, train_loss, epoch))
 
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 best_val_epoch = epoch
-                best_val_model = model
+                best_val_state_dict = model.state_dict()
             
             if train_loss < best_train_loss:
                 best_train_loss = train_loss
                 best_train_epoch = epoch
-                best_train_model = model
+                best_train_state_dict = model.state_dict()
             
 
         print(F'BEST EPOCH (VAL): {best_val_epoch}')
         print(F'BEST LOSS (VAL): {best_val_loss}')
         print("Saving best model...")
-        torch.save(best_val_model.state_dict(), output +'/'+'_epoch_' + str(best_val_epoch) + '.pkl')
+        torch.save(best_val_state_dict, output +'/'+'_epoch_' + str(best_val_epoch) + '.pkl')
         print("Saved")
 
         print(F'BEST EPOCH (train): {best_train_epoch}')
         print(F'BEST LOSS (train): {best_train_loss}')
         print("Saving best model...")
-        torch.save(best_train_model.state_dict(), output +'/'+'_epoch_' + str(best_train_epoch) + '.pkl')
+        torch.save(best_train_state_dict, output +'/'+'_epoch_' + str(best_train_epoch) + '.pkl')
         print("Saved")
         
         print("Generating plot..")
@@ -347,8 +347,8 @@ if __name__ == '__main__':
 
         for good_model in all_models[:10]:
             epoch = good_model[-1]
-            model = good_model[0]
+            state_dict = good_model[0]
 
             if (epoch != best_val_epoch) and (epoch != best_train_epoch):
-                torch.save(model.state_dict(), output +'/'+'_epoch_' + str(epoch) + '.pkl')
+                torch.save(state_dict, output +'/'+'_epoch_' + str(epoch) + '.pkl')
             
