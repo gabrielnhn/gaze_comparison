@@ -131,7 +131,7 @@ if __name__ == '__main__':
         folder.sort(key=natural_keys)
         softmax = nn.Softmax(dim=1)
         with open(os.path.join(evalpath,data_set+".log"), 'w') as outfile:
-            configuration = f"\ntest configuration = gpu_id={gpu}, batch_size={batch_size}-----\n"
+            # configuration = f"\ntest configuration = gpu_id={gpu}, batch_size={batch_size}-----\n"
             print(configuration)
             outfile.write(configuration)
             epoch_list=[]
@@ -139,10 +139,11 @@ if __name__ == '__main__':
             avg_pitch=[]
             avg_MAE_test=[]
             avg_MAE_val=[]
+            model = ML2CS180()
+
             for epochs in folder:
                 # Base network structure
 
-                model = ML2CS180()
                 saved_state_dict = torch.load(os.path.join(snapshot_path, epochs))
                 model.load_state_dict(saved_state_dict)
                 model.cuda(gpu)
@@ -222,7 +223,7 @@ if __name__ == '__main__':
                 avg_MAE_val.append(v)
                 
                 # x = ''.join(filter(lambda i: i.isdigit(), epochs))
-                loger = f"[{epochs}---{args.dataset}] Total Num:{total},MAE_V:{v}, MAE_T:{t}\n"
+                loger = f"[{epochs}] Total Num:{total},MAE_V:{v}, MAE_T:{t}\n"
                 outfile.write(loger)
                 print(loger)
                 # epoch_list.append(x)
