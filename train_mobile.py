@@ -343,7 +343,7 @@ if __name__ == '__main__':
 
 
         # save top10 val
-        all_models.sort(key=lambda x: -x[1])
+        all_models.sort(key=lambda x: x[1])
 
         for good_model in all_models[:10]:
             epoch = good_model[-1]
