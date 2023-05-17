@@ -102,7 +102,8 @@ class ML2CS180(nn.Module):
         super(ML2CS180, self).__init__()
         # self.backbone = torchvision.models.mobilenet_v2().features
         # self.backbone = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
-        mobilenet_v2 = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1', num_classes=self.num_bins)
+        # mobilenet_v2 = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1', num_classes=self.num_bins)
+        mobilenet_v2 = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
         self.backbone = mobilenet_v2.features
         # Freeze weights
         # for param in self.backbone.parameters():
@@ -112,7 +113,7 @@ class ML2CS180(nn.Module):
 
         self.fc_yaw_gaze = nn.Linear(1280, self.num_bins)
         self.fc_yaw_gaze.load_state_dict(classifier_dict)
-        
+
         self.fc_pitch_gaze = nn.Linear(1280, self.num_bins)
         self.fc_pitch_gaze.load_state_dict(classifier_dict)
 
