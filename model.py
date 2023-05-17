@@ -112,13 +112,18 @@ class ML2CS180(nn.Module):
         classifier_dict = mobilenet_v2.classifier.state_dict()
         classifier_dict["weight"] = classifier_dict["1.weight"]
         classifier_dict["bias"] = classifier_dict["1.bias"]
+        classifier_dict.remove("1.weight")
+        classifier_dict.remove("1.bias")
 
         self.fc_yaw_gaze = nn.Linear(1280, self.num_bins)
-        self.fc_yaw_gaze.load_state_dict(classifier_dict)
 
         self.fc_pitch_gaze = nn.Linear(1280, self.num_bins)
-        self.fc_pitch_gaze.load_state_dict(classifier_dict)
 
+        try:
+            self.fc_yaw_gaze.load_state_dict(classifier_dict)
+            self.fc_pitch_gaze.load_state_dict(classifier_dict)
+        except RuntimeError as e:
+            print(f"IGNORING {e}")
         
         # self.fc_yaw_gaze = nn.Linear(1000, self.num_bins)
         # self.fc_pitch_gaze = nn.Linear(1000, self.num_bins)
