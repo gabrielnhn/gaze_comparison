@@ -97,7 +97,7 @@ if __name__ == '__main__':
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_test, j) for j in folder]
         # gaze_dataset_test=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_test, transformations, 90, binwidth, train=False)
-        gaze_dataset_test=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_test, transformations, angle, binwidth, train=True)
+        gaze_dataset_test=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_test, transformations, 90, binwidth, train=True)
         
         test_loader = torch.utils.data.DataLoader(
             dataset=gaze_dataset_test,
@@ -111,7 +111,7 @@ if __name__ == '__main__':
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_val, j) for j in folder]
         # gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, angle, binwidth, train=True)
-        gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 180, binwidth)
+        gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 90, binwidth)
 
         
         val_loader = torch.utils.data.DataLoader(
