@@ -317,13 +317,13 @@ if __name__ == '__main__':
         print(F'BEST EPOCH (VAL): {best_val_epoch}')
         print(F'BEST LOSS (VAL): {best_val_loss}')
         print("Saving best model...")
-        torch.save(best_val_state_dict, output +'/'+'_epoch_' + str(best_val_epoch) + '.pkl')
+        torch.save(best_val_state_dict, output +'/'+'_best_val_' + str(best_val_epoch) + '.pkl')
         print("Saved")
 
         print(F'BEST EPOCH (train): {best_train_epoch}')
         print(F'BEST LOSS (train): {best_train_loss}')
         print("Saving best model...")
-        torch.save(best_train_state_dict, output +'/'+'_epoch_' + str(best_train_epoch) + '.pkl')
+        torch.save(best_train_state_dict, output +'/'+'_best_train_' + str(best_train_epoch) + '.pkl')
         print("Saved")
         
         print("Generating plot..")
@@ -349,6 +349,7 @@ if __name__ == '__main__':
             epoch = good_model[-1]
             state_dict = good_model[0]
 
+            print(f"Saving state_dict from epoch {epoch}")
             if (epoch != best_val_epoch) and (epoch != best_train_epoch):
                 torch.save(state_dict, output +'/'+'_epoch_' + str(epoch) + '.pkl')
             
