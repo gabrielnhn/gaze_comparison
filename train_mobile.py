@@ -301,17 +301,17 @@ if __name__ == '__main__':
             avg_MAE_val.append(val_loss)
             avg_MAE_train.append(train_loss)
           
-            all_models.append((model.state_dict(), val_loss, train_loss, epoch))
+            all_models.append((model.state_dict().copy(), val_loss, train_loss, epoch))
 
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
                 best_val_epoch = epoch
-                best_val_state_dict = model.state_dict()
+                best_val_state_dict = model.state_dict().copy()
             
             if train_loss < best_train_loss:
                 best_train_loss = train_loss
                 best_train_epoch = epoch
-                best_train_state_dict = model.state_dict()
+                best_train_state_dict = model.state_dict().copy()
             
 
         print(F'BEST EPOCH (VAL): {best_val_epoch}')
