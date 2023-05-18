@@ -233,35 +233,7 @@ if __name__ == '__main__':
 
                     for p,y,pl,yl in zip(pitch_predicted_cpu,yaw_predicted_cpu,label_pitch_cpu,label_yaw_cpu):
                         avg_error_train += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
-
-
-            # # VALIDATION
-            # with torch.no_grad(): 
-            #     avg_error_val = 0.0
-            #     total_val = 0
-            #     for j, (images, labels, cont_labels, name) in enumerate(val_loader):
-            #         images = Variable(images).cuda(gpu)
-            #         total_val += cont_labels.size(0)
-
-            #         label_yaw = cont_labels[:,0].float()*np.pi/180
-            #         label_pitch = cont_labels[:,1].float()*np.pi/180
-
-            #         gaze_yaw, gaze_pitch = model(images)
-                    
-            #         # Continuous predictions
-            #         pitch_predicted = softmax(gaze_pitch)
-            #         yaw_predicted = softmax(gaze_yaw)
-                    
-            #         # mapping from binned (0 to 28) to angels (-180 to 180)  
-            #         pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
-            #         yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
-
-            #         pitch_predicted = pitch_predicted*np.pi/180
-            #         yaw_predicted = yaw_predicted*np.pi/180
-
-            #         for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
-            #             avg_error_val += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
-            ## VALIDATION        
+ 
 
             model.eval()
             with torch.no_grad():
@@ -300,6 +272,9 @@ if __name__ == '__main__':
 
             avg_MAE_val.append(val_loss)
             avg_MAE_train.append(train_loss)
+
+            torch.save(model.state_dict(), output +'/'+'epoch_' + str(epoch) + '.pkl')
+
           
             all_models.append((model.state_dict().copy(), val_loss, train_loss, epoch))
 
@@ -342,14 +317,14 @@ if __name__ == '__main__':
         # plt.show()
 
 
-        # save top10 val
-        all_models.sort(key=lambda x: x[1])
+        # # save top10 val
+        # all_models.sort(key=lambda x: x[1])
 
-        for good_model in all_models[:10]:
-            epoch = good_model[-1]
-            state_dict = good_model[0]
+        # for good_model in all_models[:10]:
+        #     epoch = good_model[-1]
+        #     state_dict = good_model[0]
 
-            print(f"Saving state_dict from epoch {epoch}")
-            if (epoch != best_val_epoch) and (epoch != best_train_epoch):
-                torch.save(state_dict, output +'/'+'_epoch_' + str(epoch) + '.pkl')
+        #     print(f"Saving state_dict from epoch {epoch}")
+        #     if (epoch != best_val_epoch) and (epoch != best_train_epoch):
+        #         torch.save(state_dict, output +'/'+'_epoch_' + str(epoch) + '.pkl')
             
