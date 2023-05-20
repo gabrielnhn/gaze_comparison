@@ -181,8 +181,8 @@ if __name__ == '__main__':
                 yaw_predicted, pitch_predicted = model(images_gaze)
 
                 # Cross entropy loss
-                loss_pitch_gaze = criterion(pitch, label_pitch_gaze)
-                loss_yaw_gaze = criterion(yaw, label_yaw_gaze)
+                loss_pitch_gaze = criterion(pitch_predicted, label_pitch_gaze)
+                loss_yaw_gaze = criterion(yaw_predicted, label_yaw_gaze)
 
                 # MSE loss
                 # pitch_predicted = softmax(pitch)
