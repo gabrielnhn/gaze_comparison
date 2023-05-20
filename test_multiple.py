@@ -129,7 +129,6 @@ if __name__ == '__main__':
         # list all epochs for testing
         folder = os.listdir(snapshot_path)
         folder.sort(key=natural_keys)
-        softmax = nn.Softmax(dim=1)
         with open(os.path.join(evalpath,data_set+".log"), 'w') as outfile:
             configuration = f"\ntest configuration = gpu_id={gpu}, batch_size={batch_size}-----\n"
             print(configuration)
@@ -165,17 +164,13 @@ if __name__ == '__main__':
                         label_yaw = cont_labels[:,0].float()*np.pi/180
                         label_pitch = cont_labels[:,1].float()*np.pi/180
 
-                        gaze_yaw, gaze_pitch = model(images)
+                        yaw_predicted, pitch_predicted = model(images)
                         
                         # Binned predictions
                         _, pitch_bpred = torch.max(gaze_pitch.data, 1)
                         _, yaw_bpred = torch.max(gaze_yaw.data, 1)
                         
             
-                        # Continuous predictions
-                        pitch_predicted = softmax(gaze_pitch)
-                        yaw_predicted = softmax(gaze_yaw)
-                        
                         # mapping from binned (0 to 28) to angels (-180 to 180)  
                         pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
                         yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
@@ -203,11 +198,11 @@ if __name__ == '__main__':
                         label_pitch = cont_labels[:,1].float()*np.pi/180
                         
 
-                        gaze_yaw, gaze_pitch = model(images)
+                        yaw_predicted, pitch_predicted = model(images)
             
                         # Continuous predictions
-                        pitch_predicted = softmax(gaze_pitch)
-                        yaw_predicted = softmax(gaze_yaw)
+                        # pitch_predicted = softmax(gaze_pitch)
+                        # yaw_predicted = softmax(gaze_yaw)
                         
                         # mapping from binned (0 to 28) to angels (-180 to 180)  
                         pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180

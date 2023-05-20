@@ -138,7 +138,7 @@ if __name__ == '__main__':
         
         criterion = nn.CrossEntropyLoss().cuda(gpu)
         reg_criterion = nn.MSELoss().cuda(gpu)
-        softmax = nn.Softmax(dim=1).cuda(gpu)
+        # softmax = nn.Softmax(dim=1).cuda(gpu)
 
         idx_tensor = [idx for idx in range(model.num_bins)]
         idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
@@ -176,15 +176,15 @@ if __name__ == '__main__':
                 label_pitch_cont_gaze = Variable(cont_labels_gaze[:, 1]).cuda(gpu)
                 label_yaw_cont_gaze = Variable(cont_labels_gaze[:, 0]).cuda(gpu)
 
-                yaw, pitch = model(images_gaze)
+                yaw_predicted, pitch_predicted = model(images_gaze)
 
                 # Cross entropy loss
                 loss_pitch_gaze = criterion(pitch, label_pitch_gaze)
                 loss_yaw_gaze = criterion(yaw, label_yaw_gaze)
 
                 # MSE loss
-                pitch_predicted = softmax(pitch)
-                yaw_predicted = softmax(yaw)
+                # pitch_predicted = softmax(pitch)
+                # yaw_predicted = softmax(yaw)
 
                 with torch.no_grad():
                     pitch_predicted_cpu = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
@@ -249,11 +249,11 @@ if __name__ == '__main__':
                     label_pitch = cont_labels[:,1].float()*np.pi/180
                     
 
-                    gaze_yaw, gaze_pitch = model(images)
+                    yaw_predicted, pitch_predicted = model(images)
         
                     # Continuous predictions
-                    pitch_predicted = softmax(gaze_pitch)
-                    yaw_predicted = softmax(gaze_yaw)
+                    # pitch_predicted = softmax(gaze_pitch)
+                    # yaw_predicted = softmax(gaze_yaw)
                     
                     # mapping from binned (0 to 28) to angels (-180 to 180)  
                     pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180

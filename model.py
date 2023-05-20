@@ -123,11 +123,10 @@ class ML2CS180(nn.Module):
             self.fc_yaw_gaze.load_state_dict(classifier_dict)
             self.fc_pitch_gaze.load_state_dict(classifier_dict)
         except RuntimeError as e:
-            print(f"IGNORING {e}")
-        
-        # self.fc_yaw_gaze = nn.Linear(1000, self.num_bins)
-        # self.fc_pitch_gaze = nn.Linear(1000, self.num_bins)
+            print(f"IGNORING State dict errors")
 
+        self.softmax = nn.Softmax(dim=1)
+        
 
     def forward(self, x):
         x = self.backbone(x)
@@ -141,5 +140,9 @@ class ML2CS180(nn.Module):
         # gaze
         pre_yaw_gaze =  self.fc_yaw_gaze(x)
         pre_pitch_gaze = self.fc_pitch_gaze(x)
-        return pre_yaw_gaze, pre_pitch_gaze
+
+        yaw = self.softmax(pre_yaw_gaze)
+        pitch = self.softmax(pre_pitch_gaze)
+
+        return yaw, pitch
 
