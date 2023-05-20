@@ -209,7 +209,8 @@ if __name__ == '__main__':
                 # sum_loss_pitch_gaze += loss_pitch_gaze
                 # sum_loss_yaw_gaze += loss_yaw_gaze
 
-                loss_seq = [loss_pitch_gaze, loss_yaw_gaze]
+                # loss_seq = [loss_pitch_gaze, loss_yaw_gaze]
+                loss_seq = [loss_yaw_gaze, loss_pitch_gaze]
                 grad_seq = [torch.tensor(1.0).cuda(gpu) for _ in range(len(loss_seq))]
                 optimizer_gaze.zero_grad(set_to_none=True)
                 torch.autograd.backward(loss_seq, grad_seq)
