@@ -161,7 +161,9 @@ if __name__ == '__main__':
             avg_error_train = 0.0
             total_train = 0
 
-            sum_loss_pitch_gaze = sum_loss_yaw_gaze = iter_gaze = 0
+            sum_loss_pitch_gaze = 0
+            sum_loss_yaw_gaze = 0
+            iter_gaze = 0
             
             model.train()
             for i, (images_gaze, labels_gaze, cont_labels_gaze,name) in enumerate(train_loader_gaze):
@@ -173,8 +175,8 @@ if __name__ == '__main__':
                 label_pitch_gaze = Variable(labels_gaze[:, 1]).cuda(gpu)
 
                 # Continuous labels
-                label_pitch_cont_gaze = Variable(cont_labels_gaze[:, 1]).cuda(gpu)
                 label_yaw_cont_gaze = Variable(cont_labels_gaze[:, 0]).cuda(gpu)
+                label_pitch_cont_gaze = Variable(cont_labels_gaze[:, 1]).cuda(gpu)
 
                 yaw_predicted, pitch_predicted = model(images_gaze)
 
@@ -204,27 +206,27 @@ if __name__ == '__main__':
                 loss_pitch_gaze += alpha * loss_reg_pitch
                 loss_yaw_gaze += alpha * loss_reg_yaw
 
-                sum_loss_pitch_gaze += loss_pitch_gaze
-                sum_loss_yaw_gaze += loss_yaw_gaze
+                # sum_loss_pitch_gaze += loss_pitch_gaze
+                # sum_loss_yaw_gaze += loss_yaw_gaze
 
                 loss_seq = [loss_pitch_gaze, loss_yaw_gaze]
                 grad_seq = [torch.tensor(1.0).cuda(gpu) for _ in range(len(loss_seq))]
                 optimizer_gaze.zero_grad(set_to_none=True)
                 torch.autograd.backward(loss_seq, grad_seq)
                 optimizer_gaze.step()
-                iter_gaze += 1
+                # iter_gaze += 1
                 
-                if (i+1) % 400 == 0:
-                    print('Epoch [%d/%d], Iter [%d/%d] Losses: '
-                        'Gaze Yaw %.4f,Gaze Pitch %.4f' % (
-                            epoch+1,
-                            num_epochs,
-                            i+1,
-                            len(dataset)//batch_size,
-                            sum_loss_pitch_gaze/iter_gaze,
-                            sum_loss_yaw_gaze/iter_gaze
-                        )
-                        )
+                # if (i+1) % 400 == 0:
+                #     print('Epoch [%d/%d], Iter [%d/%d] Losses: '
+                #         'Gaze Yaw %.4f,Gaze Pitch %.4f' % (
+                #             epoch+1,
+                #             num_epochs,
+                #             i+1,
+                #             len(dataset)//batch_size,
+                #             sum_loss_pitch_gaze/iter_gaze,
+                #             sum_loss_yaw_gaze/iter_gaze
+                #         )
+                #         )
             
 
                 with torch.no_grad():
@@ -269,6 +271,8 @@ if __name__ == '__main__':
                     
             # val_loss = (avg_error_val/total_val)
             train_loss = (avg_error_train/total_train)
+
+            print(f"Epoch {epoch}: val:{val_loss} ; train:{train_loss}")
 
             avg_MAE_val.append(val_loss)
             avg_MAE_train.append(train_loss)
