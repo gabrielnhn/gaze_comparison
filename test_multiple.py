@@ -167,8 +167,8 @@ if __name__ == '__main__':
                         yaw_predicted, pitch_predicted = model(images)
                         
                         # Binned predictions
-                        _, pitch_bpred = torch.max(gaze_pitch.data, 1)
-                        _, yaw_bpred = torch.max(gaze_yaw.data, 1)
+                        _, pitch_bpred = torch.max(pitch_predicted.data, 1)
+                        _, yaw_bpred = torch.max(yaw_predicted.data, 1)
                         
             
                         # mapping from binned (0 to 28) to angels (-180 to 180)  
