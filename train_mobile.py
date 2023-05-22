@@ -171,12 +171,6 @@ if __name__ == '__main__':
             model.train()
             for i, (images_gaze, labels_gaze, cont_labels_gaze,name) in enumerate(train_loader_gaze):
                 
-                print("IMAGES_GAZE")
-                print(type(images_gaze))
-
-                print("labels_gaze")
-                print(type(labels_gaze))
-                # print(images_gaze)
                 # Solve mirrors?
                 # images_gaze = images_gaze[0] + images_gaze[1]
                 # labels_gaze = labels_gaze[0] + labels_gaze[1]
@@ -200,9 +194,6 @@ if __name__ == '__main__':
                 label_pitch_cont_gaze = Variable(cont_labels_gaze[:, 1]).cuda(gpu)
 
                 #Mirror
-                # mirror_image = [ ImageOps.mirror(img) for img in images_gaze]
-                # mirror_image = [torchvision.transforms.functional.hflip(img) for img in images_gaze]
-                # mirror_image = [torchvision.transforms.functional.hflip(img) for img in images_gaze]
                 mirror_image = images_gaze.detach().clone()
                 for i in range(len(mirror_image)):
                     mirror_image[i] = torchvision.transforms.functional.hflip(mirror_image[i])
@@ -219,7 +210,6 @@ if __name__ == '__main__':
                 mirror_pitch_bin = Variable(torch.tensor(mirror_pitch_bin)).cuda(gpu)
                 mirror_pitch_cont = Variable(torch.Tensor(mirror_pitch_cont)).cuda(gpu)
                 mirror_yaw_cont = Variable(torch.Tensor(mirror_yaw_cont)).cuda(gpu)
-
 
                 ##CALCULATE ORIGINAL
 
