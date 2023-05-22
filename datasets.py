@@ -86,8 +86,8 @@ class Gaze360(Dataset):
             mirror_yaw = (yaw + 180) % (360)
             mirror_cont = torch.FloatTensor([mirror_pitch, mirror_yaw])
 
-            # return (img, mirror_image), (labels, mirror_bin), (cont_labels, mirror_cont), (name)
+            return (img, mirror_image), (labels, mirror_bin), (cont_labels, mirror_cont), (name)
 
 
-        # else:
-        return img, labels, cont_labels, name
+        else:
+            return img, labels, cont_labels, name
