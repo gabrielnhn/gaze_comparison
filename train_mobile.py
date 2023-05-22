@@ -195,7 +195,9 @@ if __name__ == '__main__':
                 label_pitch_cont_gaze = Variable(cont_labels_gaze[:, 1]).cuda(gpu)
 
                 #Mirror
-                mirror_image = [ ImageOps.mirror(img) for img in images_gaze]
+                # mirror_image = [ ImageOps.mirror(img) for img in images_gaze]
+                mirror_image = [ torchvision.transforms.functional.hflip(img) for img in images_gaze]
+                
                 mirror_yaw_bin = [ (binned_yaw + num_bins//2) % num_bins for binned_yaw in label_yaw_gaze]
                 mirror_pitch_bin = [ (binned_pitch + num_bins//2) % num_bins for binned_pitch in label_pitch_gaze]
                 mirror_pitch_cont = [ (pitch + 180) % (360) for pitch in label_pitch_cont_gaze]
