@@ -171,7 +171,8 @@ if __name__ == '__main__':
             model.train()
             for i, (images_gaze, labels_gaze, cont_labels_gaze,name) in enumerate(train_loader_gaze):
                 
-
+                print("IMAGES_GAZE")
+                print(type(images_gaze))
                 # Solve mirrors?
                 # images_gaze = images_gaze[0] + images_gaze[1]
                 # labels_gaze = labels_gaze[0] + labels_gaze[1]
