@@ -6,8 +6,7 @@ import cv2
 import torch
 from torch.utils.data.dataset import Dataset
 from torchvision import transforms
-from PIL import Image, ImageFilter, ImageFile
-from pillow import ImageOps
+from PIL import Image, ImageFilter, ImageFile, ImageOps
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
