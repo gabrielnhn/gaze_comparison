@@ -89,7 +89,8 @@ class Gaze360(Dataset):
             # return (img, mirror_image), (labels, mirror_bin), (cont_labels, mirror_cont), (name)
             returs = []
             for t in (img, mirror_image), (labels, mirror_bin), (cont_labels, mirror_cont), (name):
-                returns.append(np.array(t))
+                returs.append(np.array(t))
+            return returs
 
 
         else:
