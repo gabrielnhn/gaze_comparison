@@ -203,11 +203,11 @@ if __name__ == '__main__':
                 mirror_pitch_cont = [(pitch + 180) % (360) for pitch in label_pitch_cont_gaze]
                 mirror_yaw_cont = [(yaw + 180) % (360) for yaw in label_yaw_cont_gaze]
 
-                mirror_image = Variable(mirror_image).cuda(gpu)
-                mirror_yaw_bin = Variable(mirror_yaw_bin).cuda(gpu)
-                mirror_pitch_bin = Variable(mirror_pitch_bin).cuda(gpu)
-                mirror_pitch_cont = Variable(mirror_pitch_cont).cuda(gpu)
-                mirror_yaw_cont = Variable(mirror_yaw_cont).cuda(gpu)
+                mirror_image = Variable(torch.Tensor(mirror_image)).cuda(gpu)
+                mirror_yaw_bin = Variable(torch.Tensor(mirror_yaw_bin)).cuda(gpu)
+                mirror_pitch_bin = Variable(torch.Tensor(mirror_pitch_bin)).cuda(gpu)
+                mirror_pitch_cont = Variable(torch.Tensor(mirror_pitch_cont)).cuda(gpu)
+                mirror_yaw_cont = Variable(torch.Tensor(mirror_yaw_cont)).cuda(gpu)
 
 
                 ##CALCULATE ORIGINAL
