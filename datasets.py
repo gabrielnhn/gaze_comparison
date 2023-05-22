@@ -89,5 +89,5 @@ class Gaze360(Dataset):
             # return (img, mirror_image), (labels, mirror_bin), (cont_labels, mirror_cont), (name)
 
 
-        else:
-            return img, labels, cont_labels, name
+        # else:
+        return img, labels, cont_labels, name
