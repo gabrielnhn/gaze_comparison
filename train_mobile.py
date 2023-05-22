@@ -215,8 +215,8 @@ if __name__ == '__main__':
 
                 # mirror_image = Variable(torch.Tensor(mirror_image)).cuda(gpu)
                 mirror_image = Variable(mirror_image).cuda(gpu)
-                mirror_yaw_bin = Variable(torch.Tensor(mirror_yaw_bin)).cuda(gpu)
-                mirror_pitch_bin = Variable(torch.Tensor(mirror_pitch_bin)).cuda(gpu)
+                mirror_yaw_bin = Variable(torch.tensor(mirror_yaw_bin)).cuda(gpu)
+                mirror_pitch_bin = Variable(torch.tensor(mirror_pitch_bin)).cuda(gpu)
                 mirror_pitch_cont = Variable(torch.Tensor(mirror_pitch_cont)).cuda(gpu)
                 mirror_yaw_cont = Variable(torch.Tensor(mirror_yaw_cont)).cuda(gpu)
 
