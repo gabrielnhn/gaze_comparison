@@ -60,10 +60,6 @@ class Gaze360(Dataset):
         pitch = label[0]* 180 / np.pi
         yaw = label[1]* 180 / np.pi
 
-
-            
-
-
         img = Image.open(os.path.join(self.root, face))
 
         if self.mirror:
@@ -74,9 +70,7 @@ class Gaze360(Dataset):
             img = self.transform(img)
             if self.mirror:
                 mirror_image = ImageOps.mirror(mirror_image)        
-        
-
-        
+                
         
         # Bin values
         bins = np.array(range(-1*self.angle, self.angle, self.binwidth))
