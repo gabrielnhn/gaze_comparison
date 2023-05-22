@@ -173,6 +173,9 @@ if __name__ == '__main__':
                 
                 print("IMAGES_GAZE")
                 print(type(images_gaze))
+
+                print("labels_gaze")
+                print(type(labels_gaze))
                 # print(images_gaze)
                 # Solve mirrors?
                 # images_gaze = images_gaze[0] + images_gaze[1]
