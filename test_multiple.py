@@ -88,6 +88,9 @@ if __name__ == '__main__':
         )
     ])
 
+
+
+    # SET BINWIDTH TO ML2CS180
     binwidth = int(360/180)
     
     if data_set=="gaze360":
@@ -96,8 +99,7 @@ if __name__ == '__main__':
         folder = os.listdir(args.gaze360label_dir_test)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_test, j) for j in folder]
-        # gaze_dataset_test=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_test, transformations, 90, binwidth, train=False)
-        gaze_dataset_test=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_test, transformations, 90, binwidth, train=True)
+        gaze_dataset_test=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_test, transformations, 90, binwidth)
         
         test_loader = torch.utils.data.DataLoader(
             dataset=gaze_dataset_test,
@@ -110,7 +112,6 @@ if __name__ == '__main__':
         folder = os.listdir(args.gaze360label_dir_val)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_val, j) for j in folder]
-        # gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, angle, binwidth, train=True)
         gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 90, binwidth)
 
         
