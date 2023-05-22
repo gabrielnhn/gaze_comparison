@@ -62,14 +62,20 @@ class Gaze360(Dataset):
 
         img = Image.open(os.path.join(self.root, face))
 
-        if self.mirror:
-            mirror_image = ImageOps.mirror(img)
+        # if self.mirror:
+        #     mirror_image = ImageOps.mirror(img)
+        # if self.mirror:
+        #     num_bins = int(360/self.binwidth)
+        #     mirror_bin = (binned_pose + num_bins//2) % num_bins
+        #     mirror_pitch = (pitch + 180) % (360)            
+        #     mirror_yaw = (yaw + 180) % (360)
+        #     mirror_cont = torch.FloatTensor([mirror_pitch, mirror_yaw])
+        #     if self.mirror:
+        #         mirror_image = ImageOps.mirror(mirror_image)        
 
 
         if self.transform:
             img = self.transform(img)
-            if self.mirror:
-                mirror_image = ImageOps.mirror(mirror_image)        
                 
         
         # Bin values
@@ -79,19 +85,6 @@ class Gaze360(Dataset):
         labels = binned_pose
         cont_labels = torch.FloatTensor([pitch, yaw])
         
-        if self.mirror:
-            num_bins = int(360/self.binwidth)
-            mirror_bin = (binned_pose + num_bins//2) % num_bins
-            mirror_pitch = (pitch + 180) % (360)            
-            mirror_yaw = (yaw + 180) % (360)
-            mirror_cont = torch.FloatTensor([mirror_pitch, mirror_yaw])
-
-            # return (img, mirror_image), (labels, mirror_bin), (cont_labels, mirror_cont), (name)
-            returs = []
-            for t in (img, mirror_image), (labels, mirror_bin), (cont_labels, mirror_cont), (name):
-                returs.append(np.array(t))
-            return returs
 
 
-        else:
-            return img, labels, cont_labels, name
+        return img, labels, cont_labels, name

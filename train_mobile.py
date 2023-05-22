@@ -173,9 +173,26 @@ if __name__ == '__main__':
                 
 
                 # Solve mirrors?
-                images_gaze = images_gaze[0] + images_gaze[1]
-                labels_gaze = labels_gaze[0] + labels_gaze[1]
-                cont_labels_gaze = cont_labels_gaze[0] + cont_labels_gaze[1]
+                # images_gaze = images_gaze[0] + images_gaze[1]
+                # labels_gaze = labels_gaze[0] + labels_gaze[1]
+                # cont_labels_gaze = cont_labels_gaze[0] + cont_labels_gaze[1]
+
+                # mirror_image = ImageOps.mirror(img)
+                # num_bins = int(360/self.binwidth)
+                # mirror_bin = (binned_pose + num_bins//2) % num_bins
+                # mirror_pitch = (pitch + 180) % (360)            
+                # mirror_yaw = (yaw + 180) % (360)
+                # mirror_cont = torch.FloatTensor([mirror_pitch, mirror_yaw])
+
+                mirror_image = ImageOps.mirror(img)
+                num_bins = int(360/self.binwidth)
+                mirror_bin = (binned_pose + num_bins//2) % num_bins
+                mirror_pitch = (pitch + 180) % (360)            
+                mirror_yaw = (yaw + 180) % (360)
+                mirror_cont = torch.FloatTensor([mirror_pitch, mirror_yaw])
+
+                mirror nnow roks
+
 
 
                 total_train += cont_labels_gaze.size(0)
