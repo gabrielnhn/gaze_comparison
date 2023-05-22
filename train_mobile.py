@@ -173,6 +173,7 @@ if __name__ == '__main__':
                 
                 print("IMAGES_GAZE")
                 print(type(images_gaze))
+                print(images_gaze)
                 # Solve mirrors?
                 # images_gaze = images_gaze[0] + images_gaze[1]
                 # labels_gaze = labels_gaze[0] + labels_gaze[1]
@@ -197,7 +198,8 @@ if __name__ == '__main__':
 
                 #Mirror
                 # mirror_image = [ ImageOps.mirror(img) for img in images_gaze]
-                mirror_image = [transforms.ToTensor(torchvision.transforms.functional.hflip(img)) for img in images_gaze]
+                mirror_image = [torchvision.transforms.functional.hflip(img) for img in images_gaze]
+                print(mirror_image)
                 mirror_yaw_bin = [(binned_yaw + model.num_bins//2) % model.num_bins for binned_yaw in label_yaw_gaze]
                 mirror_pitch_bin = [(binned_pitch + model.num_bins//2) % model.num_bins for binned_pitch in label_pitch_gaze]
                 mirror_pitch_cont = [(pitch + 180) % (360) for pitch in label_pitch_cont_gaze]
