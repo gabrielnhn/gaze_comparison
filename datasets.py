@@ -80,10 +80,10 @@ class Gaze360(Dataset):
         
         # Bin values
         bins = np.array(range(-1*self.angle, self.angle, self.binwidth))
-        binned_pose = np.digitize([pitch, yaw], bins) - 1
+        binned_pose = np.digitize([yaw, pitch], bins) - 1
 
         labels = binned_pose
-        cont_labels = torch.FloatTensor([pitch, yaw])
+        cont_labels = torch.FloatTensor([yaw, pitch])
         
 
 
