@@ -66,8 +66,14 @@ class Gaze360(Dataset):
 
         img = Image.open(os.path.join(self.root, face))
 
+        if self.mirror:
+            mirror_image = ImageOps.mirror(img)
+
+
         if self.transform:
-            img = self.transform(img)        
+            img = self.transform(img)
+            if self.mirror:
+                mirror_image = ImageOps.mirror(mirror_image)        
         
 
         
