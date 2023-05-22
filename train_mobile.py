@@ -197,13 +197,13 @@ if __name__ == '__main__':
 
                 #Mirror
                 # mirror_image = [ ImageOps.mirror(img) for img in images_gaze]
-                mirror_image = [torchvision.transforms.functional.hflip(img) for img in images_gaze]
+                mirror_image = [transforms.ToTensor(torchvision.transforms.functional.hflip(img)) for img in images_gaze]
                 mirror_yaw_bin = [(binned_yaw + model.num_bins//2) % model.num_bins for binned_yaw in label_yaw_gaze]
                 mirror_pitch_bin = [(binned_pitch + model.num_bins//2) % model.num_bins for binned_pitch in label_pitch_gaze]
                 mirror_pitch_cont = [(pitch + 180) % (360) for pitch in label_pitch_cont_gaze]
                 mirror_yaw_cont = [(yaw + 180) % (360) for yaw in label_yaw_cont_gaze]
 
-                mirror_image = Variable(transforms.ToTensor(mirror_image)).cuda(gpu)
+                mirror_image = Variable(mirror_image).cuda(gpu)
                 # mirror_image = Variable(mirror_image).cuda(gpu)
                 mirror_yaw_bin = Variable(torch.Tensor(mirror_yaw_bin)).cuda(gpu)
                 mirror_pitch_bin = Variable(torch.Tensor(mirror_pitch_bin)).cuda(gpu)
