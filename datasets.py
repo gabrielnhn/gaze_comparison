@@ -6,16 +6,17 @@ import cv2
 import torch
 from torch.utils.data.dataset import Dataset
 from torchvision import transforms
-from PIL import Image, ImageFilter, ImageFile
+from PIL import Image, ImageFilter, ImageFile, ImageOps
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class Gaze360(Dataset):
-    def __init__(self, path, root, transform, angle, binwidth, train=True):
+    def __init__(self, path, root, transform, angle, binwidth, train=True, mirror=False):
         self.transform = transform
         self.root = root
         self.orig_list_len = 0
         self.angle = angle
+        self.mirror = mirror
         # if train==False:
         #   angle=90
         self.binwidth=binwidth
@@ -59,10 +60,17 @@ class Gaze360(Dataset):
         pitch = label[0]* 180 / np.pi
         yaw = label[1]* 180 / np.pi
 
+
+            
+
+
         img = Image.open(os.path.join(self.root, face))
 
         if self.transform:
             img = self.transform(img)        
+        
+
+        
         
         # Bin values
         bins = np.array(range(-1*self.angle, self.angle, self.binwidth))
@@ -71,5 +79,16 @@ class Gaze360(Dataset):
         labels = binned_pose
         cont_labels = torch.FloatTensor([pitch, yaw])
         
+        if self.mirror:
+            num_bins = int(360/self.binwidth)
+            mirror_image = ImageOps.mirror(img)
+            mirror_bin = (binned_pose + num_bins//2) % num_bins
+            mirror_pitch = (pitch + 180) % (360)            
+            mirror_yaw = (yaw + 180) % (360)
+            mirror_cont = torch.FloatTensor([mirror_pitch, mirror_yaw])
 
-        return img, labels, cont_labels, name
+            return (img, mirror_image), (labels, mirror_bin), (cont_labels, mirror_cont), (name)
+
+
+        else:
+            return img, labels, cont_labels, name

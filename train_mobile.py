@@ -20,6 +20,9 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from calendar import month_name
 
+from PIL import ImageOps
+
+
 def parse_args():
     """Parse input arguments."""
     
@@ -104,7 +107,7 @@ if __name__ == '__main__':
         folder = os.listdir(args.gaze360label_dir_train)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_train, j) for j in folder] 
-        dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, transformations, 180, binwidth)
+        dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, transformations, 180, binwidth, mirror=True)
         print('Loading data.')
         train_loader_gaze = DataLoader(
             dataset=dataset,
@@ -167,6 +170,14 @@ if __name__ == '__main__':
             
             model.train()
             for i, (images_gaze, labels_gaze, cont_labels_gaze,name) in enumerate(train_loader_gaze):
+                
+
+                # Solve mirrors?
+                images_gaze = images_gaze[0] + images_gaze[1]
+                labels_gaze = labels_gaze[0] + labels_gaze[1]
+                cont_labels_gaze = cont_labels_gaze[0] + cont_labels_gaze[1]
+
+
                 total_train += cont_labels_gaze.size(0)
                 images_gaze = Variable(images_gaze).cuda(gpu)
                 
