@@ -86,6 +86,7 @@ class Gaze360(Dataset):
         cont_labels = torch.FloatTensor([pitch, yaw])
         
         if self.mirror:
+            num_bins = int(360/self.binwidth)
             mirror_bin = (binned_pose + num_bins//2) % num_bins
             mirror_pitch = (pitch + 180) % (360)            
             mirror_yaw = (yaw + 180) % (360)
