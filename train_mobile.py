@@ -170,20 +170,9 @@ if __name__ == '__main__':
             
             model.train()
             for i, (images_gaze, labels_gaze, cont_labels_gaze,name) in enumerate(train_loader_gaze):
-                
-                # Solve mirrors?
-                # images_gaze = images_gaze[0] + images_gaze[1]
-                # labels_gaze = labels_gaze[0] + labels_gaze[1]
-                # cont_labels_gaze = cont_labels_gaze[0] + cont_labels_gaze[1]
 
-                # mirror_image = ImageOps.mirror(img)
-                # num_bins = int(360/self.binwidth)
-                # mirror_bin = (binned_pose + num_bins//2) % num_bins
-                # mirror_pitch = (pitch + 180) % (360)            
-                # mirror_yaw = (yaw + 180) % (360)
-                # mirror_cont = torch.FloatTensor([mirror_pitch, mirror_yaw])
-
-                total_train += cont_labels_gaze.size(0)
+                # total_train += cont_labels_gaze.size(0)
+                total_train += 2 * cont_labels_gaze.size(0)
                 images_gaze = Variable(images_gaze).cuda(gpu)
                 
                 # Binned labels
@@ -200,9 +189,7 @@ if __name__ == '__main__':
 
                 # print(mirror_image)
                 mirror_yaw_bin = [int((binned_yaw + model.num_bins//2) % model.num_bins) for binned_yaw in label_yaw_gaze]
-                # mirror_pitch_bin = [int((binned_pitch + model.num_bins//2) % model.num_bins) for binned_pitch in label_pitch_gaze]
                 mirror_pitch_bin = [int(binned_pitch) for binned_pitch in label_pitch_gaze]
-                # mirror_pitch_cont = [(pitch + 180) % (360) for pitch in label_pitch_cont_gaze]
                 mirror_pitch_cont = [pitch for pitch in label_pitch_cont_gaze]
                 mirror_yaw_cont = [(yaw + 180) % (360) for yaw in label_yaw_cont_gaze]
 

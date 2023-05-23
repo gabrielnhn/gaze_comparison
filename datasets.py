@@ -57,8 +57,8 @@ class Gaze360(Dataset):
         label = np.array(gaze2d.split(",")).astype("float")
         label = torch.from_numpy(label).type(torch.FloatTensor)
 
-        pitch = label[0]* 180 / np.pi
-        yaw = label[1]* 180 / np.pi
+        yaw = label[0]* 180 / np.pi
+        pitch = label[1]* 180 / np.pi
 
         img = Image.open(os.path.join(self.root, face))
 
