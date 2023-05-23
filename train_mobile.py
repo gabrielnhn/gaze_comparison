@@ -188,10 +188,12 @@ if __name__ == '__main__':
                     mirror_image[i] = torchvision.transforms.functional.hflip(mirror_image[i])
 
                 # print(mirror_image)
-                mirror_yaw_bin = [int((binned_yaw + model.num_bins//2) % model.num_bins) for binned_yaw in label_yaw_gaze]
+                # mirror_yaw_bin = [int((binned_yaw + model.num_bins//2) % model.num_bins) for binned_yaw in label_yaw_gaze]
+                mirror_yaw_bin = [(model.num_bins -1 - binned_yaw) for binned_yaw in label_yaw_gaze]
                 mirror_pitch_bin = [int(binned_pitch) for binned_pitch in label_pitch_gaze]
                 mirror_pitch_cont = [pitch for pitch in label_pitch_cont_gaze]
-                mirror_yaw_cont = [(yaw + 180) % (360) for yaw in label_yaw_cont_gaze]
+                # mirror_yaw_cont = [(yaw + 180) % (360) for yaw in label_yaw_cont_gaze]
+                mirror_yaw_cont = [-yaw for yaw in label_yaw_cont_gaze]
 
                 # mirror_image = Variable(torch.Tensor(mirror_image)).cuda(gpu)
                 mirror_image = Variable(mirror_image).cuda(gpu)
