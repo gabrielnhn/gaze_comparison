@@ -8,6 +8,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from torchvision import transforms
+import torchvision.transforms.v2 as transformsv2
 import torch.backends.cudnn as cudnn
 import torchvision
 
@@ -81,7 +82,7 @@ augmentation_transform = transforms.Compose([
         transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1)
     ]), p=0.5),
     transforms.RandomApply(torch.nn.ModuleList([
-        torchvision.transforms.v2.RandomPhotometricDistort()
+        transformsv2.RandomPhotometricDistort()
     ]), p=0.5),
     transforms.RandomApply(torch.nn.ModuleList([
         transforms.GaussianBlur(kernel_size=5)  # Adjust kernel_size as desired
