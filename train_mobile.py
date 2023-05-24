@@ -67,6 +67,9 @@ def parse_args():
     parser.add_argument(
         '--lr', dest='lr', help='Base learning rate.',
         default=0.00001, type=float)
+    parser.add_argument(
+        '--decay', dest='decay', help='Learning rate decay.',
+        default=0.000001, type=float)
     # ---------------------------------------------------------------------------------------------------------------------
     # Important args ------------------------------------------------------------------------------------------------------
     args = parser.parse_args()
@@ -146,7 +149,7 @@ if __name__ == '__main__':
         idx_tensor = [idx for idx in range(model.num_bins)]
         idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
         
-        optimizer_gaze = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), args.lr)
+        optimizer_gaze = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), args.lr, weight_decay=args.decay)
 
         avg_MAE_train=[]
         avg_MAE_val=[]

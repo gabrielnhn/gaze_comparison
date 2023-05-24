@@ -115,9 +115,15 @@ class ML2CS180(nn.Module):
         # classifier_dict.remove("1.weight")
         # classifier_dict.remove("1.bias")
 
-        self.fc_yaw_gaze = nn.Linear(1280, self.num_bins)
+        self.fc_yaw_gaze = nn.Sequential(
+            nn.Dropout(p=0.25),
+            nn.Linear(1280, self.num_bins)
+        )
 
-        self.fc_pitch_gaze = nn.Linear(1280, self.num_bins)
+        self.fc_pitch_gaze = nn.Sequential(
+            nn.Dropout(p=0.25),
+            nn.Linear(1280, self.num_bins)
+        )
 
         try:
             self.fc_yaw_gaze.load_state_dict(classifier_dict)
