@@ -190,8 +190,6 @@ if __name__ == '__main__':
                 total_train += 2 * cont_labels_gaze.size(0)
                 images_gaze = Variable(images_gaze).cuda(gpu)
 
-                images_gaze = augmentation_transform(images_gaze)
-
                 label_yaw_gaze = Variable(labels_gaze[:, 0]).cuda(gpu)
                 label_pitch_gaze = Variable(labels_gaze[:, 1]).cuda(gpu)
                 label_yaw_cont_gaze = Variable(cont_labels_gaze[:, 0]).cuda(gpu)
@@ -212,6 +210,7 @@ if __name__ == '__main__':
                 mirror_yaw_cont = Variable(torch.Tensor(mirror_yaw_cont)).cuda(gpu)
 
                 # Calculate loss for original image
+                images_gaze = augmentation_transform(images_gaze)
                 yaw_predicted, pitch_predicted = model(images_gaze)
                 loss_pitch_gaze = criterion(pitch_predicted, label_pitch_gaze)
                 loss_yaw_gaze = criterion(yaw_predicted, label_yaw_gaze)
@@ -231,20 +230,20 @@ if __name__ == '__main__':
                 optimizer_gaze.step()
 
                 # Calculate error for original image
-                # pitch_predicted_cpu = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
-                # yaw_predicted_cpu = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
-                label_pitch_cpu = cont_labels_gaze[:, 1].float() * np.pi / 180
-                label_pitch_cpu = label_pitch_cpu.cpu()
-                label_yaw_cpu = cont_labels_gaze[:, 0].float() * np.pi / 180
-                label_yaw_cpu = label_yaw_cpu.cpu()
+                with torch.no_grad():
+                    label_pitch_cpu = cont_labels_gaze[:, 1].float() * np.pi / 180
+                    label_pitch_cpu = label_pitch_cpu.cpu()
+                    label_yaw_cpu = cont_labels_gaze[:, 0].float() * np.pi / 180
+                    label_yaw_cpu = label_yaw_cpu.cpu()
 
-                pitch_predicted_cpu = pitch_predicted.cpu() * np.pi / 180
-                yaw_predicted_cpu = yaw_predicted.cpu() * np.pi / 180
+                    pitch_predicted_cpu = pitch_predicted.cpu() * np.pi / 180
+                    yaw_predicted_cpu = yaw_predicted.cpu() * np.pi / 180
 
-                for p, y, pl, yl in zip(pitch_predicted_cpu, yaw_predicted_cpu, label_pitch_cpu, label_yaw_cpu):
-                    avg_error_train += angular(gazeto3d([p, y]), gazeto3d([pl, yl]))
+                    for p, y, pl, yl in zip(pitch_predicted_cpu, yaw_predicted_cpu, label_pitch_cpu, label_yaw_cpu):
+                        avg_error_train += angular(gazeto3d([p, y]), gazeto3d([pl, yl]))
 
-                # Calculate loss for mirrored image
+                # Calculate loss for mirrored images
+                mirror_image = augmentation_transform(mirror_image)
                 yaw_predicted, pitch_predicted = model(mirror_image)
                 loss_pitch_gaze = criterion(pitch_predicted, mirror_pitch_bin)
                 loss_yaw_gaze = criterion(yaw_predicted, mirror_yaw_bin)
@@ -263,20 +262,18 @@ if __name__ == '__main__':
                 torch.autograd.backward(loss_seq, grad_seq)
                 optimizer_gaze.step()
 
-                # Calculate error for mirrored image
-                # pitch_predicted_cpu = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
-                # yaw_predicted_cpu = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
-                label_pitch_cpu = mirror_pitch_cont.float() * np.pi / 180
-                label_pitch_cpu = label_pitch_cpu.cpu()
-                label_yaw_cpu = mirror_yaw_cont.float() * np.pi / 180
-                label_yaw_cpu = label_yaw_cpu.cpu()
+                # Calculate error for mirrored images
+                with torch.no_grad():
+                    label_pitch_cpu = mirror_pitch_cont.float() * np.pi / 180
+                    label_pitch_cpu = label_pitch_cpu.cpu()
+                    label_yaw_cpu = mirror_yaw_cont.float() * np.pi / 180
+                    label_yaw_cpu = label_yaw_cpu.cpu()
 
-                pitch_predicted_cpu = pitch_predicted.cpu() * np.pi / 180
-                yaw_predicted_cpu = yaw_predicted.cpu() * np.pi / 180
+                    pitch_predicted_cpu = pitch_predicted.cpu() * np.pi / 180
+                    yaw_predicted_cpu = yaw_predicted.cpu() * np.pi / 180
 
-                for p, y, pl, yl in zip(pitch_predicted_cpu, yaw_predicted_cpu, label_pitch_cpu, label_yaw_cpu):
-                    avg_error_train += angular(gazeto3d([p, y]), gazeto3d([pl, yl]))
-
+                    for p, y, pl, yl in zip(pitch_predicted_cpu, yaw_predicted_cpu, label_pitch_cpu, label_yaw_cpu):
+                        avg_error_train += angular(gazeto3d([p, y]), gazeto3d([pl, yl]))
 
 
             model.eval()
