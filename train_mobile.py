@@ -215,6 +215,10 @@ if __name__ == '__main__':
                 yaw_predicted, pitch_predicted = model(images_gaze)
                 loss_pitch_gaze = criterion(pitch_predicted, label_pitch_gaze)
                 loss_yaw_gaze = criterion(yaw_predicted, label_yaw_gaze)
+                
+                pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1) * binwidth - 180
+                yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1) * binwidth - 180
+                
                 loss_reg_pitch = reg_criterion(pitch_predicted, label_pitch_cont_gaze)
                 loss_reg_yaw = reg_criterion(yaw_predicted, label_yaw_cont_gaze)
                 loss_pitch_gaze += alpha * loss_reg_pitch
@@ -244,6 +248,10 @@ if __name__ == '__main__':
                 yaw_predicted, pitch_predicted = model(mirror_image)
                 loss_pitch_gaze = criterion(pitch_predicted, mirror_pitch_bin)
                 loss_yaw_gaze = criterion(yaw_predicted, mirror_yaw_bin)
+                
+                pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1) * binwidth - 180
+                yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1) * binwidth - 180
+
                 loss_reg_pitch = reg_criterion(pitch_predicted, mirror_pitch_cont)
                 loss_reg_yaw = reg_criterion(yaw_predicted, mirror_yaw_cont)
                 loss_pitch_gaze += alpha * loss_reg_pitch
