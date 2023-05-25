@@ -76,6 +76,21 @@ def parse_args():
     return args
 
 
+
+augmentation_transform = transforms.Compose([
+    transforms.RandomApply(torch.nn.ModuleList([
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1)
+    ]), p=0.25),
+    # transforms.RandomApply(torch.nn.ModuleList([
+    #     transformsv2.RandomPhotometricDistort()
+    # ]), p=0.25),
+    transforms.RandomApply(torch.nn.ModuleList([
+        transforms.GaussianBlur(kernel_size=3)  # Adjust kernel_size as desired
+    ]), p=0.25),
+])
+
+
+
 if __name__ == '__main__':
     args = parse_args()
     cudnn.enabled = True
@@ -191,14 +206,11 @@ if __name__ == '__main__':
                     mirror_image[i] = torchvision.transforms.functional.hflip(mirror_image[i])
 
                 # print(mirror_image)
-                # mirror_yaw_bin = [int((binned_yaw + model.num_bins//2) % model.num_bins) for binned_yaw in label_yaw_gaze]
                 mirror_yaw_bin = [(model.num_bins -1 - binned_yaw) for binned_yaw in label_yaw_gaze]
                 mirror_pitch_bin = [int(binned_pitch) for binned_pitch in label_pitch_gaze]
                 mirror_pitch_cont = [pitch for pitch in label_pitch_cont_gaze]
-                # mirror_yaw_cont = [(yaw + 180) % (360) for yaw in label_yaw_cont_gaze]
                 mirror_yaw_cont = [-yaw for yaw in label_yaw_cont_gaze]
 
-                # mirror_image = Variable(torch.Tensor(mirror_image)).cuda(gpu)
                 mirror_image = Variable(mirror_image).cuda(gpu)
                 mirror_yaw_bin = Variable(torch.tensor(mirror_yaw_bin)).cuda(gpu)
                 mirror_pitch_bin = Variable(torch.tensor(mirror_pitch_bin)).cuda(gpu)
@@ -206,7 +218,7 @@ if __name__ == '__main__':
                 mirror_yaw_cont = Variable(torch.Tensor(mirror_yaw_cont)).cuda(gpu)
 
                 ##CALCULATE ORIGINAL
-
+                images_gaze = augmentation_transform(images_gaze)
                 yaw_predicted, pitch_predicted = model(images_gaze)
 
                 # Cross entropy loss
@@ -246,6 +258,7 @@ if __name__ == '__main__':
  
 
                 ####### CALCULATE MIRROR
+                mirror_image = augmentation_transform(mirror_image)
                 yaw_predicted, pitch_predicted = model(mirror_image)
 
                 # Cross entropy loss
