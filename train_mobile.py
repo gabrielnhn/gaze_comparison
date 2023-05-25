@@ -80,13 +80,10 @@ def parse_args():
 augmentation_transform = transforms.Compose([
     transforms.RandomApply(torch.nn.ModuleList([
         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1)
-    ]), p=0.25),
-    # transforms.RandomApply(torch.nn.ModuleList([
-    #     transformsv2.RandomPhotometricDistort()
-    # ]), p=0.25),
+    ]), p=0.5),
     transforms.RandomApply(torch.nn.ModuleList([
         transforms.GaussianBlur(kernel_size=3)  # Adjust kernel_size as desired
-    ]), p=0.25),
+    ]), p=0.5),
 ])
 
 
