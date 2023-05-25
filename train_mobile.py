@@ -217,6 +217,8 @@ if __name__ == '__main__':
 
                 ##CALCULATE ORIGINAL
 
+                images_gaze = augmentation_transform(images_gaze)
+
                 yaw_predicted, pitch_predicted = model(images_gaze)
 
                 # Cross entropy loss
@@ -256,6 +258,8 @@ if __name__ == '__main__':
  
 
                 ####### CALCULATE MIRROR
+                mirror_image = augmentation_transform(mirror_image)
+
                 yaw_predicted, pitch_predicted = model(mirror_image)
 
                 # Cross entropy loss
