@@ -8,7 +8,7 @@ import torch.nn as nn
 from torch.autograd import Variable
 from torch.utils.data import DataLoader
 from torchvision import transforms
-import torchvision.transforms.v2 as transformsv2
+# import torchvision.transforms.v2 as transformsv2
 import torch.backends.cudnn as cudnn
 import torchvision
 
