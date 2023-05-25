@@ -39,8 +39,6 @@ if __name__ == '__main__':
     args = parse_args()
 
     cudnn.enabled = True
-    arch=args.arch
-
     image_filename = args.image_filename
 
     batch_size = 1
