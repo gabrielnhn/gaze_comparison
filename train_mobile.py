@@ -177,7 +177,7 @@ if __name__ == '__main__':
         best_train_model = None
 
         all_models = []
-                for epoch in range(num_epochs):
+        for epoch in range(num_epochs):
             avg_error_train = 0.0
             total_train = 0
             sum_loss_pitch_gaze = 0
