@@ -79,14 +79,14 @@ def parse_args():
 
 augmentation_transform = transforms.Compose([
     transforms.RandomApply(torch.nn.ModuleList([
-        transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1)
-    ]), p=0.5),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1)
+    ]), p=0.25),
+    # transforms.RandomApply(torch.nn.ModuleList([
+    #     transformsv2.RandomPhotometricDistort()
+    # ]), p=0.25),
     transforms.RandomApply(torch.nn.ModuleList([
-        transformsv2.RandomPhotometricDistort()
-    ]), p=0.5),
-    transforms.RandomApply(torch.nn.ModuleList([
-        transforms.GaussianBlur(kernel_size=5)  # Adjust kernel_size as desired
-    ]), p=0.5),
+        transforms.GaussianBlur(kernel_size=3)  # Adjust kernel_size as desired
+    ]), p=0.25),
 ])
 
 
@@ -196,7 +196,9 @@ if __name__ == '__main__':
                 label_pitch_cont_gaze = Variable(cont_labels_gaze[:, 1]).cuda(gpu)
 
                 # Mirror augmentation
-                mirror_image = torchvision.transforms.functional.hflip(images_gaze.clone())
+                mirror_image = images_gaze.detach().clone()
+                for i in range(len(mirror_image)):
+                    mirror_image[i] = torchvision.transforms.functional.hflip(mirror_image[i])
 
                 mirror_yaw_bin = [(model.num_bins - 1 - binned_yaw) for binned_yaw in label_yaw_gaze]
                 mirror_pitch_bin = [int(binned_pitch) for binned_pitch in label_pitch_gaze]
