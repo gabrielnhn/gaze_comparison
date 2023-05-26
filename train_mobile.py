@@ -77,14 +77,14 @@ def parse_args():
 
 
 
-augmentation_transform = transforms.Compose([
-    transforms.RandomApply(torch.nn.ModuleList([
-        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1)
-    ]), p=0.5),
-    transforms.RandomApply(torch.nn.ModuleList([
-        transforms.GaussianBlur(kernel_size=3)  # Adjust kernel_size as desired
-    ]), p=0.5),
-])
+# augmentation_transform = transforms.Compose([
+#     transforms.RandomApply(torch.nn.ModuleList([
+#         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1)
+#     ]), p=0.5),
+#     transforms.RandomApply(torch.nn.ModuleList([
+#         transforms.GaussianBlur(kernel_size=3)  # Adjust kernel_size as desired
+#     ]), p=0.5),
+# ])
 
 
 
@@ -98,9 +98,24 @@ if __name__ == '__main__':
     alpha = args.alpha
     output=args.output    
     
-    transformations = transforms.Compose([
+    val_transform = transforms.Compose([
         # transforms.Resize(448),
         transforms.Resize(224),
+        transforms.ToTensor(),
+        transforms.Normalize(
+            mean=[0.485, 0.456, 0.406],
+            std=[0.229, 0.224, 0.225]
+        )
+    ])
+    train_transform = transforms.Compose([
+        # transforms.Resize(448),
+        transforms.Resize(224),
+        transforms.RandomApply(torch.nn.ModuleList([
+            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1)
+        ]), p=0.5),
+        transforms.RandomApply(torch.nn.ModuleList([
+            transforms.GaussianBlur(kernel_size=3)  # Adjust kernel_size as desired
+        ]), p=0.5),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406],
@@ -122,7 +137,8 @@ if __name__ == '__main__':
         folder = os.listdir(args.gaze360label_dir_train)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_train, j) for j in folder] 
-        dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, transformations, 180, binwidth, mirror=True)
+        # dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, transformations, 180, binwidth, mirror=True)
+        dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, train_transform, 180, binwidth, mirror=True)
         print('Loading data.')
         train_loader_gaze = DataLoader(
             dataset=dataset,
@@ -135,7 +151,8 @@ if __name__ == '__main__':
         folder = os.listdir(args.gaze360label_dir_val)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_val, j) for j in folder]
-        gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 180, binwidth)
+        gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, val_transform, 180, binwidth)
+        # gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 180, binwidth)
         
         val_loader = torch.utils.data.DataLoader(
             dataset=gaze_dataset_val,
