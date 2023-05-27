@@ -72,7 +72,7 @@ def parse_args():
         default=0.000001, type=float)
     parser.add_argument(
         '--reg_only', dest='reg_only', help='Learning rate decay.',
-        default=0.000001, type=float)
+        default=False, type=bool)
     # ---------------------------------------------------------------------------------------------------------------------
     # Important args ------------------------------------------------------------------------------------------------------
     args = parser.parse_args()
@@ -169,7 +169,7 @@ if __name__ == '__main__':
 
         day = datetime.now().day
         month = datetime.now().month
-        summary_name = f"VRI-{bins}-{month_name[month]}-{day}-LR{args.lr}-DEC{args.decay}-drop0.3-BATCH{batch_size}-augment"
+        summary_name = f"VRI-{bins}-{month_name[month]}-{day}-LR{args.lr}-DEC{args.decay}-drop0.3-BATCH{batch_size}-augment-CROSSENTROPY-{not args.reg_only}"
         output=os.path.join(output, summary_name)
         if not os.path.exists(output):
             os.makedirs(output)
