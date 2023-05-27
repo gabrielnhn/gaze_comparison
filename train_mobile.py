@@ -70,6 +70,9 @@ def parse_args():
     parser.add_argument(
         '--decay', dest='decay', help='Learning rate decay.',
         default=0.000001, type=float)
+    parser.add_argument(
+        '--reg_only', dest='reg_only', help='Learning rate decay.',
+        default=0.000001, type=float)
     # ---------------------------------------------------------------------------------------------------------------------
     # Important args ------------------------------------------------------------------------------------------------------
     args = parser.parse_args()
@@ -113,9 +116,9 @@ if __name__ == '__main__':
         transforms.RandomApply(torch.nn.ModuleList([
             transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1)
         ]), p=0.5),
-        transforms.RandomApply(torch.nn.ModuleList([
-            transforms.GaussianBlur(kernel_size=3)  # Adjust kernel_size as desired
-        ]), p=0.5),
+        # transforms.RandomApply(torch.nn.ModuleList([
+        #     transforms.GaussianBlur(kernel_size=3)  # Adjust kernel_size as desired
+        # ]), p=0.5),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406],
@@ -254,8 +257,13 @@ if __name__ == '__main__':
                 loss_reg_yaw = reg_criterion(yaw_predicted, label_yaw_cont_gaze)
 
                 # Total loss
-                loss_pitch_gaze += alpha * loss_reg_pitch
-                loss_yaw_gaze += alpha * loss_reg_yaw
+
+                if args.reg_only:
+                    loss_pitch_gaze += loss_reg_pitch
+                    loss_yaw_gaze += loss_reg_yaw
+                else:
+                    loss_pitch_gaze += alpha * loss_reg_pitch
+                    loss_yaw_gaze += alpha * loss_reg_yaw
 
                 loss_seq = [loss_yaw_gaze, loss_pitch_gaze]
                 grad_seq = [torch.tensor(1.0).cuda(gpu) for _ in range(len(loss_seq))]
