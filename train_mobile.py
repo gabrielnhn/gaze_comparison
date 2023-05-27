@@ -71,7 +71,10 @@ def parse_args():
         '--decay', dest='decay', help='Learning rate decay.',
         default=0.000001, type=float)
     parser.add_argument(
-        '--reg_only', dest='reg_only', help='Learning rate decay.',
+        '--reg_only', dest='reg_only', help='Only use regression loss.',
+        default=False, type=bool)
+    parser.add_argument(
+        '--augment', dest='augment', help='If dataset should be augmented',
         default=False, type=bool)
     # ---------------------------------------------------------------------------------------------------------------------
     # Important args ------------------------------------------------------------------------------------------------------
@@ -140,8 +143,11 @@ if __name__ == '__main__':
         folder = os.listdir(args.gaze360label_dir_train)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_train, j) for j in folder] 
-        # dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, transformations, 180, binwidth, mirror=True)
-        dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, train_transform, 180, binwidth, mirror=True)
+
+        if args.augment:
+            dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, train_transform, 180, binwidth, mirror=True)
+        else:
+            dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, val_transform, 180, binwidth, mirror=True)
         print('Loading data.')
         train_loader_gaze = DataLoader(
             dataset=dataset,
