@@ -12,7 +12,8 @@ import torch.backends.cudnn as cudnn
 import torchvision
 
 import datasets
-from model import ML2CS, ML2CS180
+# from model import ML2CS, ML2CS180
+from model import VRI_GazeNet
 from utils import select_device, natural_keys, gazeto3d, angular
 import numpy as np
 
@@ -131,11 +132,12 @@ if __name__ == '__main__':
     
     if data_set=="gaze360":
 
-        model = ML2CS180()
+        # model = ML2CS180()
+        model = VRI_GazeNet()
         model.cuda(gpu)
         bins = model.num_bins
 
-        binwidth = int(360/bins)
+        binwidth = model.binwidth
 
         print("BINWIDTH", binwidth)
 
@@ -243,10 +245,6 @@ if __name__ == '__main__':
                 ##CALCULATE ORIGINAL
                 # images_gaze = augmentation_transform(images_gaze)
                 yaw_predicted, pitch_predicted = model(images_gaze)
-
-                # Cross entropy loss
-                loss_pitch_gaze = criterion(pitch_predicted, label_pitch_gaze)
-                loss_yaw_gaze = criterion(yaw_predicted, label_yaw_gaze)
 
                 with torch.no_grad():
                     pitch_predicted_cpu = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180

@@ -70,51 +70,22 @@ class L2CS(nn.Module):
         return pre_yaw_gaze, pre_pitch_gaze
 
 
-
-
-class ML2CS(nn.Module):
+class VRI_GazeNet(nn.Module):
+    
+    num_bins = 90
+    binwidth = int(360/num_bins)
     def __init__(self):
         self.num_bins = 90
-        # super(ML2CS, self).__init__()
-        # # self.backbone = torchvision.models.mobilenet_v2().features
-        # self.backbone = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
-        # # self.backbone = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
+        self.binwidth = int(360/self.num_bins)
 
-
-        # # self.fc_yaw_gaze = nn.Linear(1280, self.num_bins)
-        # # self.fc_pitch_gaze = nn.Linear(1280, self.num_bins)
-        
-        # self.fc_yaw_gaze = nn.Linear(1000, self.num_bins)
-        # self.fc_pitch_gaze = nn.Linear(1000, self.num_bins)
-
-
-
-    def forward(self, x):
-        x = self.backbone(x)
-        # # gaze
-        # pre_yaw_gaze =  self.fc_yaw_gaze(x)
-        # pre_pitch_gaze = self.fc_pitch_gaze(x)
-        # return pre_yaw_gaze, pre_pitch_gaze
-
-class ML2CS180(nn.Module):
-    def __init__(self):
-        self.num_bins = 180
-        super(ML2CS180, self).__init__()
-        # self.backbone = torchvision.models.mobilenet_v2().features
-        # self.backbone = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
-        # mobilenet_v2 = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1', num_classes=self.num_bins)
-        mobilenet_v2 = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
+        super(VRI_GazeNet, self).__init__()
+        # mobilenet_v2 = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
+        mobilenet_v2 = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V2', dropout=0.3)
         self.backbone = mobilenet_v2.features
-        # Freeze weights
-        # for param in self.backbone.parameters():
-        #     param.requires_grad = False
         
         classifier_dict = mobilenet_v2.classifier.state_dict()
         classifier_dict["weight"] = classifier_dict["1.weight"]
         classifier_dict["bias"] = classifier_dict["1.bias"]
-        # classifier_dict.remove("1.weight")
-        # classifier_dict.remove("1.bias")
-
         self.fc_yaw_gaze = nn.Sequential(
             nn.Dropout(p=0.3),
             nn.Linear(1280, self.num_bins)
@@ -136,13 +107,9 @@ class ML2CS180(nn.Module):
 
     def forward(self, x):
         x = self.backbone(x)
-
         # straight from https://github.com/pytorch/vision/blob/main/torchvision/models/mobilenetv2.py
-
         x = nn.functional.adaptive_avg_pool2d(x, (1, 1))
         x = torch.flatten(x, 1)
-        # x = self.classifier(x)
-
         # gaze
         pre_yaw_gaze =  self.fc_yaw_gaze(x)
         pre_pitch_gaze = self.fc_pitch_gaze(x)
@@ -151,4 +118,11 @@ class ML2CS180(nn.Module):
         pitch = self.softmax(pre_pitch_gaze)
 
         return yaw, pitch
+
+
+    def angles(self, image):
+        y, p = self.forward(x)
+        pitch_predicted_cpu = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * self.binwidth - 180
+        yaw_predicted_cpu = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * self.binwidth - 180
+        return yaw_predicted_cpu, pitch_predicted_cpu
 

@@ -12,7 +12,8 @@ import torchvision
 
 import datasets
 from utils import select_device, natural_keys, gazeto3d, angular
-from model import L2CS, ML2CS, ML2CS180
+# from model import L2CS, ML2CS, ML2CS180
+from model import L2CS, VRI_GazeNet
 
 from fvcore.nn import FlopCountAnalysis
 import typing
@@ -91,7 +92,8 @@ if __name__ == '__main__':
 
 
     # SET BINWIDTH TO ML2CS180
-    binwidth = int(360/180)
+    # binwidth = int(360/180)
+    binwidth = VRI_GazeNet.binwidth
     
     if data_set=="gaze360":
         
@@ -139,7 +141,8 @@ if __name__ == '__main__':
             avg_pitch=[]
             avg_MAE_test=[]
             avg_MAE_val=[]
-            model = ML2CS180()
+            # model = ML2CS180()
+            model = VRI_GazeNet()
 
             for epochs in folder:
                 # Base network structure
