@@ -183,7 +183,8 @@ if __name__ == '__main__':
             os.makedirs(output)
         
         criterion = nn.CrossEntropyLoss().cuda(gpu)
-        reg_criterion = nn.MSELoss().cuda(gpu)
+        # reg_criterion = nn.MSELoss().cuda(gpu)
+        reg_criterion = nn.L1Loss().cuda(gpu)
         # softmax = nn.Softmax(dim=1).cuda(gpu)
 
         idx_tensor = [idx for idx in range(model.num_bins)]
