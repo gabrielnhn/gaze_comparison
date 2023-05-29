@@ -15,7 +15,8 @@ from utils import select_device, draw_gaze
 from PIL import Image, ImageOps
 
 from face_detection import RetinaFace
-from model import ML2CS180
+# from model import ML2CS180
+from model import VRI_GazeNet
 
 
 def parse_args():
@@ -57,7 +58,6 @@ if __name__ == '__main__':
     args = parse_args()
 
     cudnn.enabled = True
-    arch=args.arch
 
     image_filename = args.image_filename
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     snapshot_path = args.snapshot
 
     transformations = transforms.Compose([
-        transforms.Resize(448),
+        transforms.Resize(224),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406],
@@ -75,7 +75,8 @@ if __name__ == '__main__':
         )
     ])
     
-    model = ML2CS180()
+    # model = ML2CS180()
+    model = VRI_GazeNet(num_bins=180)
     print('Loading snapshot.')
     saved_state_dict = torch.load(snapshot_path, map_location=torch.device('cpu'))
     model.load_state_dict(saved_state_dict)
@@ -85,8 +86,8 @@ if __name__ == '__main__':
     softmax = nn.Softmax(dim=1)
     detector = RetinaFace(gpu_id=-1)
 
-    idx_tensor = [idx for idx in range(model.num_bins)]
     # idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
+    idx_tensor = [idx for idx in range(model.num_bins)]
     idx_tensor = torch.FloatTensor(idx_tensor).cpu()
 
     frame = cv2.imread(image_filename)
@@ -116,30 +117,19 @@ if __name__ == '__main__':
                 img=transformations(im_pil)
                 # img  = Variable(img).cuda(gpu)
                 img  = Variable(img).cpu()
-
                 img  = img.unsqueeze(0) 
                 
                 # gaze prediction
-                gaze_yaw, gaze_pitch = model(img)
+                gaze_yaw, gaze_pitch = model.angles(img)
                 
-                pitch_predicted = softmax(gaze_pitch)
-                yaw_predicted = softmax(gaze_yaw)
-                
-                # Get continuous predictions in degrees.
-                pitch_predicted = torch.sum(pitch_predicted.data[0] * idx_tensor) * (360/model.num_bins) - 180
-                yaw_predicted = torch.sum(yaw_predicted.data[0] * idx_tensor) * (360/model.num_bins) - 180
-                
-                pitch_predicted= pitch_predicted.cpu().detach().numpy()* np.pi/180.0
-                yaw_predicted= yaw_predicted.cpu().detach().numpy()* np.pi/180.0
-                # pitch_predicted= pitch_predicted.cpu().detach().numpy() * 1.0
-                # yaw_predicted= yaw_predicted.cpu().detach().numpy() * 1.0
-
+                # pitch_predicted= gaze_pitch.cpu().detach().numpy()* np.pi/180.0
+                # yaw_predicted= gaze_yaw.cpu().detach().numpy()* np.pi/180.0
+                pitch_predicted= gaze_pitch[0] * np.pi/180.0
+                yaw_predicted= gaze_yaw[0] * np.pi/180.0
                 
                 cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (0,255,0), 2)
-                draw_gaze(x_min,y_min,bbox_width, bbox_height,frame,(pitch_predicted,yaw_predicted),color=(0,0,255), scale=0.5, thickness=10)
+                draw_gaze(x_min,y_min,bbox_width, bbox_height,frame,(yaw_predicted,pitch_predicted),color=(0,0,255), scale=0.5, thickness=10)
                 
                 cv2.putText(frame, f"{pitch_predicted, yaw_predicted}", (x_min,y_min), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
-
-
 
         cv2.imwrite("result.jpeg", frame)

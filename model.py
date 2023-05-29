@@ -72,10 +72,10 @@ class L2CS(nn.Module):
 
 class VRI_GazeNet(nn.Module):
     
-    num_bins = 90
-    binwidth = int(360/num_bins)
-    def __init__(self):
-        self.num_bins = 90
+    # num_bins = 90
+    # binwidth = int(360/num_bins)
+    def __init__(self, num_bins=90):
+        self.num_bins = num_bins
         self.binwidth = int(360/self.num_bins)
 
         super(VRI_GazeNet, self).__init__()
@@ -103,6 +103,8 @@ class VRI_GazeNet(nn.Module):
             print(f"IGNORING State dict errors")
 
         self.softmax = nn.Softmax(dim=1)
+        idx_tensor = [idx for idx in range(self.num_bins)]
+        self.idx_tensor = torch.FloatTensor(idx_tensor).cpu()
         
 
     def forward(self, x):
@@ -121,8 +123,8 @@ class VRI_GazeNet(nn.Module):
 
 
     def angles(self, image):
-        y, p = self.forward(x)
-        pitch_predicted_cpu = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * self.binwidth - 180
-        yaw_predicted_cpu = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * self.binwidth - 180
+        y, p = self.forward(image)
+        pitch_predicted_cpu = torch.sum(p * self.idx_tensor, 1).cpu().detach().numpy() * self.binwidth - 180
+        yaw_predicted_cpu = torch.sum(y * self.idx_tensor, 1).cpu().detach().numpy() * self.binwidth - 180
         return yaw_predicted_cpu, pitch_predicted_cpu
 
