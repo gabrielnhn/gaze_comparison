@@ -264,8 +264,8 @@ if __name__ == '__main__':
                 # Total loss
 
                 if args.reg_only:
-                    loss_pitch_gaze += loss_reg_pitch
-                    loss_yaw_gaze += loss_reg_yaw
+                    loss_pitch_gaze = loss_reg_pitch
+                    loss_yaw_gaze = loss_reg_yaw
                 else:
                     loss_pitch_gaze += alpha * loss_reg_pitch
                     loss_yaw_gaze += alpha * loss_reg_yaw
