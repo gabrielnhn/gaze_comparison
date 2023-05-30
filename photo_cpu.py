@@ -120,16 +120,17 @@ if __name__ == '__main__':
                 img  = img.unsqueeze(0) 
                 
                 # gaze prediction
-                gaze_yaw, gaze_pitch = model.angles(img)
+                gazes = model.angles(img)
+                yaw, pitch = gazes[0]
                 
                 # pitch_predicted= gaze_pitch.cpu().detach().numpy()* np.pi/180.0
                 # yaw_predicted= gaze_yaw.cpu().detach().numpy()* np.pi/180.0
-                pitch_predicted= gaze_pitch[0] * np.pi/180.0
-                yaw_predicted= gaze_yaw[0] * np.pi/180.0
+                yaw_predicted= yaw * np.pi/180.0
+                pitch_predicted= pitch * np.pi/180.0
                 
-                cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (0,255,0), 2)
-                draw_gaze(x_min,y_min,bbox_width, bbox_height,frame,(yaw_predicted,pitch_predicted),color=(0,0,255), scale=0.5, thickness=10)
+                cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (10,200,90), 1)
+                draw_gaze(x_min,y_min,bbox_width, bbox_height,frame,(yaw_predicted,pitch_predicted),color=(255, 0, 192), scale=2, thickness=4, size=x_max-x_min)
                 
-                cv2.putText(frame, f"{pitch_predicted, yaw_predicted}", (x_min,y_min), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+                # cv2.putText(frame, f"{pitch_predicted, yaw_predicted}", (x_min,y_min), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
         cv2.imwrite("result.jpeg", frame)
