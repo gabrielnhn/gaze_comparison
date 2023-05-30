@@ -72,9 +72,7 @@ class L2CS(nn.Module):
 
 class VRI_GazeNet(nn.Module):
     
-    # num_bins = 90
-    # binwidth = int(360/num_bins)
-    def __init__(self, num_bins=90):
+    def __init__(self, num_bins=180):
         self.num_bins = num_bins
         self.binwidth = int(360/self.num_bins)
 
