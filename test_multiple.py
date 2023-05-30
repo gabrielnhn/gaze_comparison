@@ -93,7 +93,9 @@ if __name__ == '__main__':
 
     # SET BINWIDTH TO ML2CS180
     # binwidth = int(360/180)
-    binwidth = VRI_GazeNet.binwidth
+    model = VRI_GazeNet()
+
+    binwidth = model.binwidth
     
     if data_set=="gaze360":
         
@@ -142,7 +144,6 @@ if __name__ == '__main__':
             avg_MAE_test=[]
             avg_MAE_val=[]
             # model = ML2CS180()
-            model = VRI_GazeNet()
 
             for epochs in folder:
                 # Base network structure
