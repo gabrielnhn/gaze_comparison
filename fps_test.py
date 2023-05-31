@@ -112,10 +112,10 @@ if __name__ == '__main__':
                 total += cont_labels.size(0)
                 yaw_predicted, pitch_predicted = model(images) 
 
-                if model == l2cs:
-                    f = FlopCountAnalysis(model, images)
-                    print(model.name, f.total())
-                    print(model.name, f.total()/cont_labels.size(0))
+                # if model == l2cs:
+                #     f = FlopCountAnalysis(model, images)
+                #     print(model.name, f.total())
+                #     print(model.name, f.total()/cont_labels.size(0))
 
         end = datetime.datetime.now()
         duration = end - start
