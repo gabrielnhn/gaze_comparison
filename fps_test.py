@@ -112,7 +112,14 @@ if __name__ == '__main__':
         start = datetime.datetime.now()
         with torch.no_grad():           
             for j, (images, labels, cont_labels, name) in enumerate(test_loader):
-                images = Variable(images).cuda(gpu)
+
+                if model == gaze360:
+                    source_frame = images.cuda(async=True)
+                    target = target.cuda(async=True)
+                    images = torch.autograd.Variable(source_frame)
+                else:
+                    images = Variable(images).cuda(gpu)
+                    
                 yaw_predicted, pitch_predicted = model(images)    
                 total += cont_labels.size(0)
 
