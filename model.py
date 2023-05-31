@@ -5,6 +5,22 @@ import math
 import torch.nn.functional as F
 import torchvision
 
+
+import torch
+import torch.nn as nn
+import torch.nn.parallel
+import torch.backends.cudnn as cudnn
+import torch.optim
+import torch.utils.data
+import torchvision.transforms as transforms
+import torchvision.datasets as datasets
+import torchvision.models as models
+import numpy as np
+from torch.nn.init import normal, constant
+import math
+from resnet import resnet18
+
+
 class L2CS(nn.Module):
     def __init__(self, block, layers, num_bins):
         self.inplanes = 64
