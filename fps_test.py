@@ -12,7 +12,7 @@ import torchvision
 
 import datasets
 from utils import select_device, natural_keys, gazeto3d, angular
-from model import L2CS, VRI_GazeNet
+from model import L2CS, VRI_GazeNet, GazeLSTM
 
 from fvcore.nn import FlopCountAnalysis
 import typing
