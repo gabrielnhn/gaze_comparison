@@ -108,7 +108,7 @@ if __name__ == '__main__':
             for j, (images, labels, cont_labels, name) in enumerate(test_loader):
                 images = Variable(images).cuda(gpu)
                 yaw_predicted, pitch_predicted = model(images)    
-                # total += cont_labels.size(0)
+                total += cont_labels.size(0)
 
                 # if model == l2cs:
                 #     f = FlopCountAnalysis(model, images)
