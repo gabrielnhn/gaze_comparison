@@ -119,7 +119,11 @@ if __name__ == '__main__':
                 else:
                     images = Variable(images).cuda(gpu)
 
-                yaw_predicted, pitch_predicted = model(images)    
+                yaw_predicted, pitch_predicted = model(images) 
+                f = FlopCountAnalysis(model, images)
+
+                print(model.name, f.total())
+
                 total += cont_labels.size(0)
 
         end = datetime.datetime.now()
