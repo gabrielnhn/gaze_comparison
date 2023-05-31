@@ -30,6 +30,9 @@ def parse_args():
     parser.add_argument(
         '--gaze360label_dir_test', dest='gaze360label_dir_test', help='Directory path for gaze labels.',
         default='../gaze360_test/Label', type=str)
+    parser.add_argument(
+        '--gaze360label_file_test', dest='gaze360label_file_test', help='Directory path for gaze labels.',
+        default='../gaze360_test/Label/test.label', type=str)
    
     parser.add_argument(
         '--gaze360image_dir_val', dest='gaze360image_dir_val', help='Directory path for gaze images.',
@@ -37,6 +40,9 @@ def parse_args():
     parser.add_argument(
         '--gaze360label_dir_val', dest='gaze360label_dir_val', help='Directory path for gaze labels.',
         default='../gaze360_val/Label', type=str)
+    parser.add_argument(
+        '--gaze360label_file_val', dest='gaze360label_dir_val', help='Directory path for gaze labels.',
+        default='../gaze360_val/Label/val.label', type=str)
    
     # Important args -------------------------------------------------------------------------------------------------------
     # ----------------------------------------------------------------------------------------------------------------------
@@ -103,7 +109,8 @@ if __name__ == '__main__':
         folder = os.listdir(args.gaze360label_dir_test)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_test, j) for j in folder]
-        gaze_dataset_test=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_test, transformations, 90, binwidth)
+        # gaze_dataset_test=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_test, transformations, angle, binwidth)
+        gaze_dataset_test=datasets.Gaze360(args.gaze360label_file_test,args.gaze360image_dir_test, transformations, angle, binwidth)
         
         test_loader = torch.utils.data.DataLoader(
             dataset=gaze_dataset_test,
@@ -116,7 +123,8 @@ if __name__ == '__main__':
         folder = os.listdir(args.gaze360label_dir_val)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_val, j) for j in folder]
-        gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 90, binwidth)
+        # gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, angle, binwidth)
+        gaze_dataset_val=datasets.Gaze360(args.gaze360label_file_val,args.gaze360image_dir_val, transformations, angle, binwidth)
 
         
         val_loader = torch.utils.data.DataLoader(
@@ -205,10 +213,6 @@ if __name__ == '__main__':
 
                         yaw_predicted, pitch_predicted = model(images)
             
-                        # Continuous predictions
-                        # pitch_predicted = softmax(gaze_pitch)
-                        # yaw_predicted = softmax(gaze_yaw)
-                        
                         # mapping from binned (0 to 28) to angels (-180 to 180)  
                         pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
                         yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180

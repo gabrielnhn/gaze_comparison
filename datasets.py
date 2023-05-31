@@ -29,6 +29,7 @@ class Gaze360(Dataset):
                     line.pop(0)
                     self.lines.extend(line)
         else:
+            print("WILL FILTER OOOOOOO")
             with open(path) as f:
                 lines = f.readlines()
                 lines.pop(0)
