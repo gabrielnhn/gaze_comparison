@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     vri = VRI_GazeNet()
     vri.name = "VRI"
-    saved_state_dict = torch.load("../models/VRI-180-May-27-LR1e-05-DEC1e-06-drop0.3-BATCH8-augment-CROSSENTROPY-False-11.07v-11.49t.pkl")
+    saved_state_dict = torch.load("../models/VRI-180-May-27-LR1e-05-DEC1e-06-drop0.3-BATCH8-augment-CROSSENTROPY-False-11.49t360-11.22t180.pkl")
     vri.load_state_dict(saved_state_dict)
 
 
