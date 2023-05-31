@@ -84,7 +84,7 @@ if __name__ == '__main__':
     l2cs.num_bins = 90
     l2cs.name = "L2CS"
     saved_state_dict = torch.load("../models/L2CSNet_gaze360.pkl")
-    model.load_state_dict(saved_state_dict)
+    l2cs.load_state_dict(saved_state_dict)
 
     # TEST
     folder = os.listdir(args.gaze360label_dir_test)
