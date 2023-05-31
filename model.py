@@ -146,7 +146,8 @@ class VRI_GazeNet(nn.Module):
 class GazeLSTM(nn.Module):
     def __init__(self):
         super(GazeLSTM, self).__init__()
-        self.img_feature_dim = 256  # the dimension of the CNN feature to represent each frame
+        # self.img_feature_dim = 256  # the dimension of the CNN feature to represent each frame
+        self.img_feature_dim = 224  # the dimension of the CNN feature to represent each frame
 
         self.base_model = resnet18(pretrained=True)
 
