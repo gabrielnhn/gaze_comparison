@@ -41,7 +41,7 @@ def parse_args():
         '--gaze360label_dir_val', dest='gaze360label_dir_val', help='Directory path for gaze labels.',
         default='../gaze360_val/Label', type=str)
     parser.add_argument(
-        '--gaze360label_file_val', dest='gaze360label_dir_val', help='Directory path for gaze labels.',
+        '--gaze360label_file_val', dest='gaze360label_file_val', help='Directory path for gaze labels.',
         default='../gaze360_val/Label/val.label', type=str)
    
     # Important args -------------------------------------------------------------------------------------------------------
