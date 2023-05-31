@@ -87,8 +87,8 @@ if __name__ == '__main__':
     l2cs.load_state_dict(saved_state_dict)
 
     model_v = GazeLSTM()
-    gaze360 = torch.nn.DataParallel(model_v).cuda()
-    gaze360.cuda()
+    # gaze360 = torch.nn.DataParallel(model_v).cuda()
+    gaze360 = model_v
     gaze360.name = "Gaze360"
 
     # TEST
