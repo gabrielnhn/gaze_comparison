@@ -86,6 +86,11 @@ if __name__ == '__main__':
     saved_state_dict = torch.load("../models/L2CSNet_gaze360.pkl")
     l2cs.load_state_dict(saved_state_dict)
 
+    model_v = GazeLSTM()
+    gaze360 = torch.nn.DataParallel(model_v).cuda()
+    gaze360.cuda()
+    gaze360.name = "Gaze360"
+
     # TEST
     folder = os.listdir(args.gaze360label_dir_test)
     folder.sort()
@@ -99,7 +104,7 @@ if __name__ == '__main__':
         num_workers=4,
         pin_memory=True)
 
-    for model in (vri, l2cs):
+    for model in (vri, l2cs, gaze360):
         # Base network structure
         model.cuda(gpu)
         model.eval()
