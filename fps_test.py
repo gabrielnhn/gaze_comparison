@@ -79,7 +79,6 @@ if __name__ == '__main__':
     saved_state_dict = torch.load("../models/VRI-180-May-27-LR1e-05-DEC1e-06-drop0.3-BATCH8-augment-CROSSENTROPY-False-11.49t360-11.22t180.pkl")
     vri.load_state_dict(saved_state_dict)
 
-
     l2cs = L2CS(torchvision.models.resnet.Bottleneck, [3, 4, 6, 3], 90)
     l2cs.num_bins = 90
     l2cs.name = "L2CS"
@@ -109,8 +108,7 @@ if __name__ == '__main__':
             for j, (images, labels, cont_labels, name) in enumerate(test_loader):
                 images = Variable(images).cuda(gpu)
                 yaw_predicted, pitch_predicted = model(images)    
-                total += cont_labels.size(0)
-                yaw_predicted, pitch_predicted = model(images) 
+                # total += cont_labels.size(0)
 
                 # if model == l2cs:
                 #     f = FlopCountAnalysis(model, images)
