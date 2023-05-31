@@ -104,7 +104,7 @@ if __name__ == '__main__':
         num_workers=4,
         pin_memory=True)
 
-    for model in (vri, l2cs, gaze360):
+    for model in (gaze360, vri, l2cs):
         # Base network structure
         model.cuda(gpu)
         model.eval()
