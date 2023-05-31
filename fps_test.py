@@ -115,7 +115,6 @@ if __name__ == '__main__':
 
                 if model == gaze360:
                     source_frame = images.cuda()
-                    target = target.cuda()
                     images = torch.autograd.Variable(source_frame)
                 else:
                     images = Variable(images).cuda(gpu)
