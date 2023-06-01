@@ -128,9 +128,9 @@ if __name__ == '__main__':
                 yaw_predicted= yaw * np.pi/180.0
                 pitch_predicted= pitch * np.pi/180.0
                 
-                cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (10,200,90), 1)
-                draw_gaze(x_min,y_min,bbox_width, bbox_height,frame,(yaw_predicted,pitch_predicted),color=(255, 0, 192), scale=2, thickness=4, size=x_max-x_min, bbox=((x_min, y_min), (x_max, y_max)))
-                
+                # cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (10,200,90), 1)
+                draw_gaze(x_min,y_min,bbox_width, bbox_height,frame,(yaw_predicted,pitch_predicted),color=(185, 240, 113), scale=1, thickness=4, size=x_max-x_min, bbox=((x_min, y_min), (x_max, y_max)))
+                # (255, 0, 192)
                 # cv2.putText(frame, f"{pitch_predicted, yaw_predicted}", (x_min,y_min), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
         cv2.imwrite("result.jpeg", frame)
