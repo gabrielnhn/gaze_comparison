@@ -17,7 +17,7 @@ from PIL import Image, ImageOps
 from face_detection import RetinaFace
 # from model import ML2CS180
 from model import VRI_GazeNet
-
+import os
 
 def parse_args():
     """Parse input arguments."""
@@ -90,49 +90,63 @@ if __name__ == '__main__':
     idx_tensor = [idx for idx in range(model.num_bins)]
     idx_tensor = torch.FloatTensor(idx_tensor).cpu()
 
-    frame = cv2.imread(image_filename)
+
+    if os.path.isdir(image_filename):
+        frames = []
+        for file in os.listdir(image_filename):
+            frame = cv2.imread(os.path.join(image_filename, file))
+
+            if frame is not None:
+                frames.append((frame, os.path.basename(file)))
+            
+    else:
+        frame = cv2.imread(image_filename)
+        frames = [(frame, os.path.basename(image_filename))]
+
 
     with torch.no_grad():
-        
-        faces = detector(frame)
-        if faces is not None: 
-            for box, landmarks, score in faces:
-                if score < .95:
-                    continue
-                x_min=int(box[0])
-                if x_min < 0:
-                    x_min = 0
-                y_min=int(box[1])
-                if y_min < 0:
-                    y_min = 0
-                x_max=int(box[2])
-                y_max=int(box[3])
-                bbox_width = x_max - x_min
-                bbox_height = y_max - y_min
-                # Crop image
-                img = frame[y_min:y_max, x_min:x_max]
-                img = cv2.resize(img, (224, 224))
-                img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                im_pil = Image.fromarray(img)
-                img=transformations(im_pil)
-                # img  = Variable(img).cuda(gpu)
-                img  = Variable(img).cpu()
-                img  = img.unsqueeze(0) 
-                
-                # gaze prediction
-                gazes = model.angles(img)
-                yaw, pitch = gazes[0]
-                print(yaw, pitch)
-                
-                # pitch_predicted= gaze_pitch.cpu().detach().numpy()* np.pi/180.0
-                # yaw_predicted= gaze_yaw.cpu().detach().numpy()* np.pi/180.0
-                yaw_predicted= yaw * np.pi/180.0
-                pitch_predicted= pitch * np.pi/180.0
-                
-                # cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (10,200,90), 1)
-                # draw_gaze(x_min,y_min,bbox_width, bbox_height,frame,(yaw_predicted,pitch_predicted),color=(150, 100, 92), scale=1, thickness=4, size=x_max-x_min, bbox=((x_min, y_min), (x_max, y_max)))
-                draw_gaze(x_min,y_min,bbox_width, bbox_height,frame,(yaw_predicted,pitch_predicted),color=(185, 240, 113), scale=1, thickness=4, size=x_max-x_min, bbox=((x_min, y_min), (x_max, y_max)))
-                # 
-                # cv2.putText(frame, f"{pitch_predicted, yaw_predicted}", (x_min,y_min), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
 
-        cv2.imwrite("result.jpeg", frame)
+        for frame, filename in frames:
+        
+            faces = detector(frame)
+            if faces is not None: 
+                for box, landmarks, score in faces:
+                    if score < .95:
+                        continue
+                    x_min=int(box[0])
+                    if x_min < 0:
+                        x_min = 0
+                    y_min=int(box[1])
+                    if y_min < 0:
+                        y_min = 0
+                    x_max=int(box[2])
+                    y_max=int(box[3])
+                    bbox_width = x_max - x_min
+                    bbox_height = y_max - y_min
+                    # Crop image
+                    img = frame[y_min:y_max, x_min:x_max]
+                    img = cv2.resize(img, (224, 224))
+                    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                    im_pil = Image.fromarray(img)
+                    img=transformations(im_pil)
+                    # img  = Variable(img).cuda(gpu)
+                    img  = Variable(img).cpu()
+                    img  = img.unsqueeze(0) 
+                    
+                    # gaze prediction
+                    gazes = model.angles(img)
+                    yaw, pitch = gazes[0]
+                    print(yaw, pitch)
+                    
+                    # pitch_predicted= gaze_pitch.cpu().detach().numpy()* np.pi/180.0
+                    # yaw_predicted= gaze_yaw.cpu().detach().numpy()* np.pi/180.0
+                    yaw_predicted= yaw * np.pi/180.0
+                    pitch_predicted= pitch * np.pi/180.0
+                    
+                    # cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (10,200,90), 1)
+                    # draw_gaze(x_min,y_min,bbox_width, bbox_height,frame,(yaw_predicted,pitch_predicted),color=(150, 100, 92), scale=1, thickness=4, size=x_max-x_min, bbox=((x_min, y_min), (x_max, y_max)))
+                    draw_gaze(x_min,y_min,bbox_width, bbox_height,frame,(yaw_predicted,pitch_predicted),color=(185, 240, 113), scale=1, thickness=4, size=x_max-x_min, bbox=((x_min, y_min), (x_max, y_max)))
+                    # 
+                    # cv2.putText(frame, f"{pitch_predicted, yaw_predicted}", (x_min,y_min), cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)
+
+            cv2.imwrite("gaze_"+filename, frame)

@@ -40,6 +40,8 @@ def draw_gaze(a,b,c,d,image_in, yawpitch, thickness=5, color=(255, 255, 255),sca
 
     print(f"Drawing {yawpitch}")
 
+    thickness = int(thickness * size/85)
+
     image_out = image_in
     (h, w) = image_in.shape[:2]
     length = size/2 * scale
@@ -48,10 +50,10 @@ def draw_gaze(a,b,c,d,image_in, yawpitch, thickness=5, color=(255, 255, 255),sca
 
     dx = -length * np.sin(yawpitch[0]) * np.cos(yawpitch[1])
     dy = -length * np.sin(yawpitch[1])
-    # pos = [int(a+c / 2.0) + dx//2, int( b+d / 2.75) + dy//2]
+    pos = [int(a+c / 2.0) + dx//2, int( b+d / 3.5) + dy//2]
     # pos = [int(a+c / 2.0) + dx, int( b+d / 2.75) + dy]
-    pos = [int(a+c / 2.0), int( b+d / 2.75)]
-    # pos = [int(a+c / 2.0), int( b+d / 3)]
+    # pos = [int(a+c / 2.0), int( b+d / 2.75)]
+    # pos = [int(a+c / 2.0), int( b+d / 4)]
 
     if pos[0] > bbox[1][0]:
         pos[0] = bbox[1][0]
