@@ -48,26 +48,29 @@ def draw_gaze(a,b,c,d,image_in, yawpitch, thickness=5, color=(255, 255, 255),sca
 
     dx = -length * np.sin(yawpitch[0]) * np.cos(yawpitch[1])
     dy = -length * np.sin(yawpitch[1])
-    pos = [int(a+c / 2.0) + dx//2, int( b+d / 2.75) + dy//2]
-    # pos = [int(a+c / 2.0), int( b+d / 2.75)]
-    # pos = [int(a+c / 2.0), int( b+d / 2.75)]
+    # pos = [int(a+c / 2.0) + dx//2, int( b+d / 2.75) + dy//2]
+    # pos = [int(a+c / 2.0) + dx, int( b+d / 2.75) + dy]
+    pos = [int(a+c / 2.0), int( b+d / 2.75)]
+    # pos = [int(a+c / 2.0), int( b+d / 3)]
 
     if pos[0] > bbox[1][0]:
         pos[0] = bbox[1][0]
     elif pos[0] < bbox[0][0]:
         pos[0] = bbox[0][0]
 
-    if pos[1] > bbox[1][0]:
-        pos[1] = bbox[1][0]
+    if pos[1] > bbox[1][1]:
+        pos[1] = bbox[1][1]
     elif pos[1] < bbox[0][1]:
         pos[1] = bbox[0][1]
 
     cv2.arrowedLine(image_out, tuple(np.round(pos).astype(np.int32)),
                    tuple(np.round([pos[0] + dx, pos[1] + dy]).astype(int)), color,
-                   thickness, cv2.LINE_AA, tipLength=0.18)
+                   thickness, cv2.LINE_AA, tipLength=0.1)
     
-    # cv2.circle(image_out, (int(pos[0] + dx*0.85), int(pos[1] + dy*0.85)), int(thickness*0.85), (45, 50, 255), 10)
-    cv2.circle(image_out, (int(pos[0] + dx*0.85), int(pos[1] + dy*0.85)), int(thickness*0.85), color, 10)
+    color2 = (color[0]+20, color[1]+20, color[2]+20)
+
+    if (bbox[0][0] < pos[0] + dx < bbox[1][0]) and (bbox[0][1] < pos[1] + dy < bbox[1][1]):
+        cv2.circle(image_out, (int(pos[0] + dx), int(pos[1] + dy)), int(thickness/2), color2, int(thickness*1.5))
     return image_out    
 
 def select_device(device='', batch_size=None):
