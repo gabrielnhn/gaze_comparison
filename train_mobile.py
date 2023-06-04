@@ -83,18 +83,6 @@ def parse_args():
     return args
 
 
-
-# augmentation_transform = transforms.Compose([
-#     transforms.RandomApply(torch.nn.ModuleList([
-#         transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1)
-#     ]), p=0.5),
-#     transforms.RandomApply(torch.nn.ModuleList([
-#         transforms.GaussianBlur(kernel_size=3)  # Adjust kernel_size as desired
-#     ]), p=0.5),
-# ])
-
-
-
 if __name__ == '__main__':
     args = parse_args()
     cudnn.enabled = True
@@ -118,11 +106,8 @@ if __name__ == '__main__':
         # transforms.Resize(448),
         transforms.Resize(224),
         transforms.RandomApply(torch.nn.ModuleList([
-            transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1)
+            transforms.ColorJitter(brightness=0.25, contrast=0.25, saturation=0.25, hue=0.25)
         ]), p=0.5),
-        # transforms.RandomApply(torch.nn.ModuleList([
-        #     transforms.GaussianBlur(kernel_size=3)  # Adjust kernel_size as desired
-        # ]), p=0.5),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406],
@@ -183,8 +168,8 @@ if __name__ == '__main__':
             os.makedirs(output)
         
         criterion = nn.CrossEntropyLoss().cuda(gpu)
-        # reg_criterion = nn.MSELoss().cuda(gpu)
-        reg_criterion = nn.L1Loss().cuda(gpu)
+        reg_criterion = nn.MSELoss().cuda(gpu)
+        # reg_criterion = nn.L1Loss().cuda(gpu)
         # softmax = nn.Softmax(dim=1).cuda(gpu)
 
         idx_tensor = [idx for idx in range(model.num_bins)]
