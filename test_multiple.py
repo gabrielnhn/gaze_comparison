@@ -106,70 +106,64 @@ if __name__ == '__main__':
     if data_set=="gaze360":
         
         # TEST
+
         folder = os.listdir(args.gaze360label_dir_test)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_test, j) for j in folder]
-        # gaze_dataset_test=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_test, transformations, angle, binwidth)
-        gaze_dataset_test=datasets.Gaze360(args.gaze360label_file_test,args.gaze360image_dir_test, transformations, angle, binwidth)
-        
-        test_loader = torch.utils.data.DataLoader(
+        gaze_dataset_test_all=datasets.Gaze360(args.gaze360label_file_test,args.gaze360image_dir_test, transformations, 180, binwidth)
+        test_loader_all = torch.utils.data.DataLoader(
             dataset=gaze_dataset_test,
             batch_size=batch_size,
             shuffle=False,
             num_workers=4,
             pin_memory=True)
 
-        # VALIDATION
-        folder = os.listdir(args.gaze360label_dir_val)
-        folder.sort()
-        testlabelpathombined = [os.path.join(args.gaze360label_dir_val, j) for j in folder]
-        # gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, angle, binwidth)
-        gaze_dataset_val=datasets.Gaze360(args.gaze360label_file_val,args.gaze360image_dir_val, transformations, angle, binwidth)
-
-        
-        val_loader = torch.utils.data.DataLoader(
-            dataset=gaze_dataset_val,
+        gaze_dataset_test_front=datasets.Gaze360(args.gaze360label_file_test,args.gaze360image_dir_test, transformations, 90, binwidth)
+        test_loader_front = torch.utils.data.DataLoader(
+            dataset=gaze_dataset_test_front,
             batch_size=batch_size,
             shuffle=False,
             num_workers=4,
             pin_memory=True)
-        
+
+        gaze_dataset_test_front_facing=datasets.Gaze360(args.gaze360label_file_test,args.gaze360image_dir_test, transformations, 40, binwidth)
+        test_loader_front_facing = torch.utils.data.DataLoader(
+            dataset=gaze_dataset_test_front_facing,
+            batch_size=batch_size,
+            shuffle=False,
+            num_workers=4,
+            pin_memory=True)
 
         if not os.path.exists(evalpath):
             os.makedirs(evalpath)
 
-
         # list all epochs for testing
         folder = os.listdir(snapshot_path)
         folder.sort(key=natural_keys)
-        with open(os.path.join(evalpath,data_set+".log"), 'w') as outfile:
-            configuration = f"\ntest configuration = gpu_id={gpu}, batch_size={batch_size}-----\n"
-            print(configuration)
-            outfile.write(configuration)
-            epoch_list=[]
-            avg_yaw=[]
-            avg_pitch=[]
-            avg_MAE_test=[]
-            avg_MAE_val=[]
-            # model = ML2CS180()
+        # model = ML2CS180()
 
-            for epochs in folder:
-                # Base network structure
+        for epochs in folder:
+            # Base network structure
 
-                saved_state_dict = torch.load(os.path.join(snapshot_path, epochs))
-                model.load_state_dict(saved_state_dict)
-                model.cuda(gpu)
-                model.eval()
+            saved_state_dict = torch.load(os.path.join(snapshot_path, epochs))
+            model.load_state_dict(saved_state_dict)
+            model.cuda(gpu)
+            model.eval()
 
-                bins = model.num_bins
-                # binwidth = int(360/bins)
-                idx_tensor = [idx for idx in range(bins)]
-                idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
+            bins = model.num_bins
+            # binwidth = int(360/bins)
+            idx_tensor = [idx for idx in range(bins)]
+            idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
+            
+            ## TEST
+            with torch.no_grad():           
                 
-                ## TEST
-                with torch.no_grad():           
+                results = []
+
+                for test_loader in (test_loader_all, test_loader_front, test_loader_front_facing):
                     total = 0
                     avg_error = .0
+
                     for j, (images, labels, cont_labels, name) in enumerate(test_loader):
                         images = Variable(images).cuda(gpu)
                         total += cont_labels.size(0)
@@ -182,7 +176,6 @@ if __name__ == '__main__':
                         # Binned predictions
                         _, pitch_bpred = torch.max(pitch_predicted.data, 1)
                         _, yaw_bpred = torch.max(yaw_predicted.data, 1)
-                        
             
                         # mapping from binned (0 to 28) to angels (-180 to 180)  
                         pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
@@ -193,56 +186,30 @@ if __name__ == '__main__':
 
                         for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
                             avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
-
-                t = avg_error/total
-                avg_MAE_test.append(t)
-
-                ## VALIDATION        
-                with torch.no_grad():
-                    total = 0
-                    # idx_tensor = [idx for idx in range(bins)]
-                    # idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
-                    avg_error = .0        
-                    for j, (images, labels, cont_labels, name) in enumerate(val_loader):
-                        images = Variable(images).cuda(gpu)
-                        total += cont_labels.size(0)
-
-                        label_yaw = cont_labels[:,0].float()*np.pi/180
-                        label_pitch = cont_labels[:,1].float()*np.pi/180
-                        
-
-                        yaw_predicted, pitch_predicted = model(images)
             
-                        # mapping from binned (0 to 28) to angels (-180 to 180)  
-                        pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
-                        yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
+                    t = avg_error/total
+                    results.append(t)
 
-                        pitch_predicted = pitch_predicted*np.pi/180
-                        yaw_predicted = yaw_predicted*np.pi/180
 
-                        for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
-                            avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
-                        
-                v = avg_error/total
-                avg_MAE_val.append(v)
-                
-                # x = ''.join(filter(lambda i: i.isdigit(), epochs))
-                loger = f"[{epochs}] Total Num:{total},MAE_V:{v}, MAE_T:{t}\n"
-                outfile.write(loger)
-                print(loger)
-                # epoch_list.append(x)
-        
+            # avg_MAE_test.append(t)
+            # v = avg_error/total
+            # avg_MAE_val.append(v)
+            # x = ''.join(filter(lambda i: i.isdigit(), epochs))
+            logger = f"[{epochs}] Total Num:{total},MAE_180:{results[0]}, MAE_90:{results[1]}, MAE_40:{results[2]}\n"
+            print(logger)
+            # epoch_list.append(x)
+    
 
-        epoch_list = list(range(len(folder)))
-        fig = plt.figure()        
-        plt.xlabel('epoch')
-        plt.ylabel('avg')
-        plt.title('Gaze angular error')
-        plt.plot(epoch_list, avg_MAE_test, color='b', label='test')
-        plt.plot(epoch_list, avg_MAE_val, color='g', label='val')
+    # epoch_list = list(range(len(folder)))
+    # fig = plt.figure()        
+    # plt.xlabel('epoch')
+    # plt.ylabel('avg')
+    # plt.title('Gaze angular error')
+    # plt.plot(epoch_list, avg_MAE_test, color='b', label='test')
+    # plt.plot(epoch_list, avg_MAE_val, color='g', label='val')
 
-        plt.legend()
-        # plt.locator_params(axis='x', nbins=30)
+    # plt.legend()
+    # # plt.locator_params(axis='x', nbins=30)
 
-        fig.savefig(os.path.join(evalpath,data_set+".png"), format='png')
-        # plt.show()
+    # fig.savefig(os.path.join(evalpath,data_set+".png"), format='png')
+    # # plt.show()

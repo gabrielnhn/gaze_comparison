@@ -70,9 +70,16 @@ def draw_gaze(a,b,c,d,image_in, yawpitch, thickness=5, color=(255, 255, 255),sca
                    thickness, cv2.LINE_AA, tipLength=0.1)
     
     color2 = (color[0]+20, color[1]+20, color[2]+20)
+    # color3 = (0, 0, 0)
+    color3 = (color[0]-80, color[1]-80, color[2]-80)
+    # color3 = (color[0]-40, color[1]-40, color[2]-40)
 
     if (bbox[0][0] < pos[0] + dx < bbox[1][0]) and (bbox[0][1] < pos[1] + dy < bbox[1][1]):
-        cv2.circle(image_out, (int(pos[0] + dx), int(pos[1] + dy)), int(thickness/2), color2, int(thickness*1.5))
+        cv2.circle(image_out, (int(pos[0] + dx), int(pos[1] + dy)), int(thickness*1.4), color2, -1)
+        cv2.circle(image_out, (int(pos[0] + dx*1.1), int(pos[1] + dy*1.1)), 1, color3, 2)
+        cv2.circle(image_out, (int(pos[0] + dx), int(pos[1] + dy)), int(thickness*1.4), color3, 1)
+
+
     return image_out    
 
 def select_device(device='', batch_size=None):
