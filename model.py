@@ -74,7 +74,7 @@ class VRI_GazeNet(nn.Module):
     
     def __init__(self, num_bins=181):
         self.num_bins = num_bins
-        self.binwidth = int(360/self.num_bins)
+        self.binwidth = int(360/(self.num_bins-1))
 
         super(VRI_GazeNet, self).__init__()
         # mobilenet_v2 = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
