@@ -36,7 +36,7 @@ def parse_args():
         '--gaze360label_dir_train', dest='gaze360label_dir_train', help='Directory path for gaze labels.',
         default='../gaze360_train/Label', type=str)
     parser.add_argument(
-        '--gaze360label_file_train', dest='gaze360label_dir_train', help='File path for gaze labels.',
+        '--gaze360label_file_train', dest='gaze360label_file_train', help='File path for gaze labels.',
         default='../gaze360_train/Label/train.label', type=str)      
     parser.add_argument(
         '--gaze360image_dir_val', dest='gaze360image_dir_val', help='Directory path for gaze images.',
