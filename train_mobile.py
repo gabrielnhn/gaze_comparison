@@ -34,7 +34,10 @@ def parse_args():
         default='../gaze360_train/Image', type=str)
     parser.add_argument(
         '--gaze360label_dir_train', dest='gaze360label_dir_train', help='Directory path for gaze labels.',
-        default='../gaze360_train/Label', type=str)   
+        default='../gaze360_train/Label', type=str)
+    parser.add_argument(
+        '--gaze360label_file_train', dest='gaze360label_dir_train', help='File path for gaze labels.',
+        default='../gaze360_train/Label/train.label', type=str)      
     parser.add_argument(
         '--gaze360image_dir_val', dest='gaze360image_dir_val', help='Directory path for gaze images.',
         default='../gaze360_val/Image', type=str)
@@ -62,6 +65,9 @@ def parse_args():
     parser.add_argument(
         '--batch_size', dest='batch_size', help='Batch size.',
         default=1, type=int)
+    parser.add_argument(
+        '--angle', dest='angle', help='Angle filter',
+        default=180, type=int)
     parser.add_argument(
         '--alpha', dest='alpha', help='Regression loss coefficient.',
         default=1, type=float)
@@ -129,12 +135,14 @@ if __name__ == '__main__':
         # TRAIN
         folder = os.listdir(args.gaze360label_dir_train)
         folder.sort()
-        testlabelpathombined = [os.path.join(args.gaze360label_dir_train, j) for j in folder] 
+        # testlabelpathombined = [os.path.join(args.gaze360label_dir_train, j) for j in folder] 
 
         if args.augment:
-            dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, train_transform, 180, binwidth, mirror=True)
+            # dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, train_transform, 180, binwidth, mirror=True)
+            dataset=datasets.Gaze360(args.gaze360label_file_train, args.gaze360image_dir_train, train_transform, args.angle, binwidth, mirror=True)
         else:
-            dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, val_transform, 180, binwidth, mirror=True)
+            # dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, train_transform, 180, binwidth, mirror=True)
+            dataset=datasets.Gaze360(args.gaze360label_file_train, args.gaze360image_dir_train, train_transform, args.angle, binwidth, mirror=True)
         print('Loading data.')
         train_loader_gaze = DataLoader(
             dataset=dataset,
