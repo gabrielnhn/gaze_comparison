@@ -79,7 +79,7 @@ class VRI_GazeNet(nn.Module):
         super(VRI_GazeNet, self).__init__()
         # mobilenet_v2 = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
         # mobilenet_v2 = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V2', dropout=0.3)
-        mobilenet_v2 = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V2')
+        mobilenet_v2 = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
         self.backbone = mobilenet_v2.features
         
         classifier_dict = mobilenet_v2.classifier.state_dict()

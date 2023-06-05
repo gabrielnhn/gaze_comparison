@@ -201,8 +201,8 @@ if __name__ == '__main__':
             avg_error_train = 0.0
             total_train = 0
 
-            sum_loss_pitch_gaze = 0
-            sum_loss_yaw_gaze = 0
+            # sum_loss_pitch_gaze = 0
+            # sum_loss_yaw_gaze = 0
             iter_gaze = 0
             
             model.train()
@@ -240,6 +240,10 @@ if __name__ == '__main__':
                 # images_gaze = augmentation_transform(images_gaze)
                 yaw_predicted, pitch_predicted = model(images_gaze)
 
+                loss_pitch_gaze = criterion(pitch_predicted, label_pitch_gaze)
+                loss_yaw_gaze = criterion(yaw_predicted, label_yaw_gaze)
+
+
                 with torch.no_grad():
                     pitch_predicted_cpu = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
                     yaw_predicted_cpu = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
@@ -256,12 +260,14 @@ if __name__ == '__main__':
 
                 # Total loss
 
-                if args.reg_only:
-                    loss_pitch_gaze = loss_reg_pitch
-                    loss_yaw_gaze = loss_reg_yaw
-                else:
-                    loss_pitch_gaze += alpha * loss_reg_pitch
-                    loss_yaw_gaze += alpha * loss_reg_yaw
+                # if args.reg_only:
+                #     loss_pitch_gaze = loss_reg_pitch
+                #     loss_yaw_gaze = loss_reg_yaw
+                # else:
+                #     loss_pitch_gaze += alpha * loss_reg_pitch
+                #     loss_yaw_gaze += alpha * loss_reg_yaw
+                loss_pitch_gaze += loss_reg_pitch
+                loss_yaw_gaze += loss_reg_yaw
 
                 loss_seq = [loss_yaw_gaze, loss_pitch_gaze]
                 grad_seq = [torch.tensor(1.0).cuda(gpu) for _ in range(len(loss_seq))]
