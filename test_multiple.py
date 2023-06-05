@@ -112,7 +112,7 @@ if __name__ == '__main__':
         testlabelpathombined = [os.path.join(args.gaze360label_dir_test, j) for j in folder]
         gaze_dataset_test_all=datasets.Gaze360(args.gaze360label_file_test,args.gaze360image_dir_test, transformations, 180, binwidth)
         test_loader_all = torch.utils.data.DataLoader(
-            dataset=gaze_dataset_test,
+            dataset=gaze_dataset_test_all,
             batch_size=batch_size,
             shuffle=False,
             num_workers=4,
