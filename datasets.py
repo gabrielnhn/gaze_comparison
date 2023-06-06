@@ -81,7 +81,7 @@ class Mpiigaze(Dataset):
     self.root = root
     self.orig_list_len = 0
     self.lines = []
-    path=pathorg.copy()
+    # path=pathorg.copy()
     # if train==True:
     #   path.pop(fold)
     # else:
