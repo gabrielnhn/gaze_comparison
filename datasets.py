@@ -90,8 +90,11 @@ class Mpiigaze(Dataset):
     self.binwidth=binwidth
 
 
-    if isinstance(path, list):
-        for i in path:
+    # if isinstance(path, list):
+    if isinstance(path, str) and os.path.isdir(path):
+        folder = os.listdir(args.gazeMpiilabel_dir)
+        folder.sort()
+        for i in folder:
             with open(i) as f:
                 lines = f.readlines()
                 lines.pop(0)
