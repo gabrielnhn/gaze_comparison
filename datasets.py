@@ -94,6 +94,7 @@ class Mpiigaze(Dataset):
     if isinstance(path, str) and os.path.isdir(path):
         folder = os.listdir(path)
         folder.sort()
+        folder = [os.path.join(path, j) for j in folder]
         for i in folder:
             with open(i) as f:
                 lines = f.readlines()
