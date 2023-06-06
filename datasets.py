@@ -88,6 +88,7 @@ class Mpiigaze(Dataset):
     # else:
     #   path=path[fold]
     self.binwidth=binwidth
+    self.angle = angle
 
 
     # if isinstance(path, list):
