@@ -92,7 +92,7 @@ class Mpiigaze(Dataset):
 
     # if isinstance(path, list):
     if isinstance(path, str) and os.path.isdir(path):
-        folder = os.listdir(args.gazeMpiilabel_dir)
+        folder = os.listdir(path)
         folder.sort()
         for i in folder:
             with open(i) as f:
