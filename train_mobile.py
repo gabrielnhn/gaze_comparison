@@ -213,6 +213,7 @@ if __name__ == '__main__':
         # sum_loss_pitch_gaze = 0
         # sum_loss_yaw_gaze = 0
         iter_gaze = 0
+        count = 0
         
         model.train()
         for i, (images_gaze, labels_gaze, cont_labels_gaze,name) in enumerate(train_loader_gaze):
@@ -252,6 +253,10 @@ if __name__ == '__main__':
             loss_pitch_gaze = criterion(pitch_predicted, label_pitch_gaze)
             loss_yaw_gaze = criterion(yaw_predicted, label_yaw_gaze)
 
+            if epoch > 10 and count <2:
+                print("Cross entropy ", loss_yaw_gaze)
+
+
 
             with torch.no_grad():
                 pitch_predicted_cpu = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
@@ -266,6 +271,13 @@ if __name__ == '__main__':
 
             loss_reg_pitch = reg_criterion(pitch_predicted, label_pitch_cont_gaze)
             loss_reg_yaw = reg_criterion(yaw_predicted, label_yaw_cont_gaze)
+
+            
+            if epoch > 10 and count <2:
+                print("L2 loss ", loss_reg_yaw)
+                count += 1
+
+
 
             # Total loss
 
