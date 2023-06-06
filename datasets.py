@@ -11,14 +11,11 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class Gaze360(Dataset):
-    def __init__(self, path, root, transform, angle, binwidth, train=True, mirror=False):
+    def __init__(self, path, root, transform, angle, binwidth, train=True):
         self.transform = transform
         self.root = root
         self.orig_list_len = 0
         self.angle = angle
-        self.mirror = mirror
-        # if train==False:
-        #   angle=90
         self.binwidth=binwidth
         self.lines = []
         if isinstance(path, list):
@@ -64,18 +61,6 @@ class Gaze360(Dataset):
 
         img = Image.open(os.path.join(self.root, face))
 
-        # if self.mirror:
-        #     mirror_image = ImageOps.mirror(img)
-        # if self.mirror:
-        #     num_bins = int(360/self.binwidth)
-        #     mirror_bin = (binned_pose + num_bins//2) % num_bins
-        #     mirror_pitch = (pitch + 180) % (360)            
-        #     mirror_yaw = (yaw + 180) % (360)
-        #     mirror_cont = torch.FloatTensor([mirror_pitch, mirror_yaw])
-        #     if self.mirror:
-        #         mirror_image = ImageOps.mirror(mirror_image)        
-
-
         if self.transform:
             img = self.transform(img)
                 
@@ -86,7 +71,79 @@ class Gaze360(Dataset):
 
         labels = binned_pose
         cont_labels = torch.FloatTensor([yaw, pitch])
-        
-
 
         return img, labels, cont_labels, name
+
+
+class Mpiigaze(Dataset): 
+  def __init__(self, pathorg, root, transform,angle, binwidth, fold=0):
+    self.transform = transform
+    self.root = root
+    self.orig_list_len = 0
+    self.lines = []
+    path=pathorg.copy()
+    # if train==True:
+    #   path.pop(fold)
+    # else:
+    #   path=path[fold]
+    self.binwidth=binwidth
+
+
+    if isinstance(path, list):
+        for i in path:
+            with open(i) as f:
+                lines = f.readlines()
+                lines.pop(0)
+                self.orig_list_len += len(lines)
+                for line in lines:
+                    gaze2d = line.strip().split(" ")[7]
+                    label = np.array(gaze2d.split(",")).astype("float")
+                    if abs((label[0]*180/np.pi)) <= angle and abs((label[1]*180/np.pi)) <= angle:
+                        self.lines.append(line)
+    else:
+      with open(path) as f:
+        lines = f.readlines()
+        lines.pop(0)
+        self.orig_list_len += len(lines)
+        for line in lines:
+            gaze2d = line.strip().split(" ")[7]
+            label = np.array(gaze2d.split(",")).astype("float")
+            if abs((label[0]*180/np.pi)) <= angle and abs((label[1]*180/np.pi)) <= angle:
+                self.lines.append(line)
+   
+    print("{} items removed from dataset that have an angle > {}".format(self.orig_list_len-len(self.lines),angle))
+        
+  def __len__(self):
+    return len(self.lines)
+
+  def __getitem__(self, idx):
+    line = self.lines[idx]
+    line = line.strip().split(" ")
+
+    name = line[3]
+    gaze2d = line[7]
+    head2d = line[8]
+    lefteye = line[1]
+    righteye = line[2]
+    face = line[0]
+
+    label = np.array(gaze2d.split(",")).astype("float")
+    label = torch.from_numpy(label).type(torch.FloatTensor)
+
+
+    yaw = label[0]* 180 / np.pi
+    pitch = label[1]* 180 / np.pi
+
+    img = Image.open(os.path.join(self.root, face))
+    
+    if self.transform:
+        img = self.transform(img)        
+    
+    # Bin values
+    bins = np.array(range(-1*self.angle, self.angle, self.binwidth))
+    binned_pose = np.digitize([yaw, pitch], bins) - 1
+
+    labels = binned_pose
+    cont_labels = torch.FloatTensor([yaw, pitch])
+
+    return img, labels, cont_labels, name

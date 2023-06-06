@@ -6,7 +6,7 @@ import torch.utils.model_zoo as model_zoo
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-from torch.utils.data import DataLoader
+from torch.utils.data import DataLoader, ConcatDataset
 from torchvision import transforms
 import torch.backends.cudnn as cudnn
 import torchvision
@@ -44,9 +44,16 @@ def parse_args():
     parser.add_argument(
         '--gaze360label_dir_val', dest='gaze360label_dir_val', help='Directory path for gaze labels.',
         default='../gaze360_val/Label', type=str)
+    
+    # mpiigaze
     parser.add_argument(
-        '--dataset', dest='dataset', help='mpiigaze, rtgene, gaze360, ethgaze',
-        default= "gaze360", type=str)
+        '--gazeMpiimage_dir', dest='gazeMpiimage_dir', help='Directory path for gaze images.',
+        default='../MPII_norm/Image', type=str)
+    parser.add_argument(
+        '--gazeMpiilabel_dir', dest='gazeMpiilabel_dir', help='Directory path for gaze labels.',
+        default='../MPII_norm/Label', type=str)
+
+
     parser.add_argument(
         '--output', dest='output', help='Path of output models.',
         default='output/snapshots/', type=str)
@@ -95,7 +102,6 @@ if __name__ == '__main__':
     num_epochs = args.num_epochs
     batch_size = args.batch_size
     gpu = select_device(args.gpu_id, batch_size=args.batch_size)
-    data_set=args.dataset
     alpha = args.alpha
     output=args.output    
     
@@ -133,16 +139,21 @@ if __name__ == '__main__':
         print("BINWIDTH", binwidth)
 
         # TRAIN
-        folder = os.listdir(args.gaze360label_dir_train)
-        folder.sort()
+        # folder = os.listdir(args.gaze360label_dir_train)
+        # folder.sort()
         # testlabelpathombined = [os.path.join(args.gaze360label_dir_train, j) for j in folder] 
 
         if args.augment:
-            # dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, train_transform, 180, binwidth, mirror=True)
-            dataset=datasets.Gaze360(args.gaze360label_file_train, args.gaze360image_dir_train, train_transform, args.angle, binwidth, mirror=True)
+            gaze360=datasets.Gaze360(args.gaze360label_file_train, args.gaze360image_dir_train, train_transform, args.angle, binwidth)
+            mpii = datasets.Mpiigaze(args.gazeMpiilabel_dir, args.gazeMpiimage_dir, train_transform, args.angle, binwidth)
+
         else:
-            # dataset=datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_train, train_transform, 180, binwidth, mirror=True)
-            dataset=datasets.Gaze360(args.gaze360label_file_train, args.gaze360image_dir_train, train_transform, args.angle, binwidth, mirror=True)
+            gaze360=datasets.Gaze360(args.gaze360label_file_train, args.gaze360image_dir_train, val_transform, args.angle, binwidth)
+            mpii = datasets.Mpiigaze(args.gazeMpiilabel_dir, args.gazeMpiimage_dir, val_transform, args.angle, binwidth)
+
+        
+        dataset = ConcatDataset([gaze360, mpii])
+        
         print('Loading data.')
         train_loader_gaze = DataLoader(
             dataset=dataset,
