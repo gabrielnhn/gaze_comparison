@@ -209,6 +209,9 @@ if __name__ == '__main__':
     best_train_model = None
 
     all_models = []
+
+    beta = args.beta
+
     for epoch in range(num_epochs):
         avg_error_train = 0.0
         total_train = 0
