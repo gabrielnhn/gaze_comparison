@@ -38,9 +38,11 @@ def angular(gaze, label):
 def draw_gaze(a,b,c,d,image_in, yawpitch, thickness=5, color=(255, 255, 255),scale=2.0, size=0, bbox=None):
     """Draw gaze angle on given image with a given eye positions."""
 
-    print(f"Drawing {yawpitch}")
+    # print(f"Drawing {yawpitch}")
 
     thickness = int(thickness * size/85)
+    if thickness < 1:
+        thickness = 1
 
     image_out = image_in
     (h, w) = image_in.shape[:2]
