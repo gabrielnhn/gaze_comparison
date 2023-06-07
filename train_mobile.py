@@ -79,6 +79,9 @@ def parse_args():
         '--alpha', dest='alpha', help='Regression loss coefficient.',
         default=1, type=float)
     parser.add_argument(
+        '--beta', dest='beta', help='Classification loss coefficient.',
+        default=1, type=float)
+    parser.add_argument(
         '--lr', dest='lr', help='Base learning rate.',
         default=0.00001, type=float)
     parser.add_argument(
@@ -250,8 +253,8 @@ if __name__ == '__main__':
             # images_gaze = augmentation_transform(images_gaze)
             yaw_predicted, pitch_predicted = model(images_gaze)
 
-            loss_pitch_gaze = criterion(pitch_predicted, label_pitch_gaze)
-            loss_yaw_gaze = criterion(yaw_predicted, label_yaw_gaze)
+            loss_pitch_gaze = beta * criterion(pitch_predicted, label_pitch_gaze)
+            loss_yaw_gaze = beta * criterion(yaw_predicted, label_yaw_gaze)
 
             if epoch > 10 and count <2:
                 print("Cross entropy ", loss_yaw_gaze)
@@ -309,8 +312,8 @@ if __name__ == '__main__':
             yaw_predicted, pitch_predicted = model(mirror_image)
 
             # Cross entropy loss
-            loss_pitch_gaze = criterion(pitch_predicted, mirror_pitch_bin)
-            loss_yaw_gaze = criterion(yaw_predicted, mirror_yaw_bin)
+            loss_pitch_gaze = beta * criterion(pitch_predicted, mirror_pitch_bin)
+            loss_yaw_gaze = beta * criterion(yaw_predicted, mirror_yaw_bin)
 
             with torch.no_grad():
                 pitch_predicted_cpu = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180

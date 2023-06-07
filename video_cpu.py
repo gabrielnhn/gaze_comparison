@@ -63,7 +63,7 @@ if __name__ == '__main__':
     ])
     
     # model = ML2CS180()
-    model = VRI_GazeNet(num_bins=180)
+    model = VRI_GazeNet(num_bins=181)
     print('Loading snapshot.')
     saved_state_dict = torch.load(snapshot_path, map_location=torch.device('cpu'))
     model.load_state_dict(saved_state_dict)
