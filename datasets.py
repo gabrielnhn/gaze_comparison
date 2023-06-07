@@ -118,6 +118,8 @@ class Mpiigaze(Dataset):
                 self.lines.append(line)
    
     print("{} items removed from dataset that have an angle > {}".format(self.orig_list_len-len(self.lines),angle))
+    print(self.orig_list_len, len(self.lines))
+
         
   def __len__(self):
     return len(self.lines)
