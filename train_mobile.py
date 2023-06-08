@@ -293,8 +293,8 @@ if __name__ == '__main__':
             # else:
             #     loss_pitch_gaze += alpha * loss_reg_pitch
             #     loss_yaw_gaze += alpha * loss_reg_yaw
-            loss_pitch_gaze += loss_reg_pitch
-            loss_yaw_gaze += loss_reg_yaw
+            loss_pitch_gaze += alpha * loss_reg_pitch
+            loss_yaw_gaze += alpha * loss_reg_yaw
 
             loss_seq = [loss_yaw_gaze, loss_pitch_gaze]
             grad_seq = [torch.tensor(1.0).cuda(gpu) for _ in range(len(loss_seq))]

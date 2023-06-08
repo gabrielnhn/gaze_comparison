@@ -99,7 +99,7 @@ if __name__ == '__main__':
             faces = detector(frame)
             if faces is not None: 
                 for box, landmarks, score in faces:
-                    if score < .95:
+                    if score < .98:
                         continue
                     x_min=int(box[0])
                     if x_min < 0:
