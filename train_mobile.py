@@ -95,7 +95,7 @@ def parse_args():
         default=False, type=bool)
     parser.add_argument(
         '--bins', dest='bins', help='Model.num_bins',
-        default=181, type=bool)
+        default=181, type=int)
     # ---------------------------------------------------------------------------------------------------------------------
     # Important args ------------------------------------------------------------------------------------------------------
     args = parser.parse_args()
