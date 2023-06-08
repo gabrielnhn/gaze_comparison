@@ -93,6 +93,9 @@ def parse_args():
     parser.add_argument(
         '--augment', dest='augment', help='If dataset should be augmented',
         default=False, type=bool)
+    parser.add_argument(
+        '--bins', dest='bins', help='Model.num_bins',
+        default=181, type=bool)
     # ---------------------------------------------------------------------------------------------------------------------
     # Important args ------------------------------------------------------------------------------------------------------
     args = parser.parse_args()
@@ -131,7 +134,7 @@ if __name__ == '__main__':
     ])
     
     # model = ML2CS180()
-    model = VRI_GazeNet()
+    model = VRI_GazeNet(num_bins=args.bins)
     model.cuda(gpu)
     bins = model.num_bins
 
