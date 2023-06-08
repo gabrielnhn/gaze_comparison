@@ -182,7 +182,7 @@ if __name__ == '__main__':
 
     day = datetime.now().day
     month = datetime.now().month
-    summary_name = f"VRI-{bins}-{month_name[month]}-{day}-LR{args.lr}-DEC{args.decay}-drop0.3-BATCH{batch_size}-augment-CROSSENTROPY-{not args.reg_only}"
+    summary_name = f"VRI-{bins}-{month_name[month]}-{day}-LR{args.lr}-DEC{args.decay}-BATCH{batch_size}-augment-CROSSENTROPY-{not args.reg_only}-alpha-{args.alpha}-beta-{args.beta}"
     output=os.path.join(output, summary_name)
     if not os.path.exists(output):
         os.makedirs(output)
