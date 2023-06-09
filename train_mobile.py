@@ -96,6 +96,11 @@ def parse_args():
     parser.add_argument(
         '--bins', dest='bins', help='Model.num_bins',
         default=181, type=int)
+
+    parser.add_argument(
+        '--best_bin', dest='best_bin', help='If best_bin loss',
+        default=0, type=float)
+    
     # ---------------------------------------------------------------------------------------------------------------------
     # Important args ------------------------------------------------------------------------------------------------------
     args = parser.parse_args()
@@ -257,35 +262,57 @@ if __name__ == '__main__':
 
             ##CALCULATE ORIGINAL
             # images_gaze = augmentation_transform(images_gaze)
-            yaw_predicted, pitch_predicted = model(images_gaze)
+            yaw_predicted_ar, pitch_predicted_ar = model(images_gaze)
 
-            loss_pitch_gaze = beta * criterion(pitch_predicted, label_pitch_gaze)
-            loss_yaw_gaze = beta * criterion(yaw_predicted, label_yaw_gaze)
+            loss_pitch_gaze = beta * criterion(pitch_predicted_ar, label_pitch_gaze)
+            loss_yaw_gaze = beta * criterion(yaw_predicted_ar, label_yaw_gaze)
 
-            if epoch > 10 and count <2:
+            if epoch > 10 and count <1:
                 print("Cross entropy ", loss_yaw_gaze)
 
 
 
             with torch.no_grad():
-                pitch_predicted_cpu = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
-                yaw_predicted_cpu = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
+                pitch_predicted_cpu = torch.sum(pitch_predicted_ar * idx_tensor, 1).cpu() * binwidth - 180
+                yaw_predicted_cpu = torch.sum(yaw_predicted_ar * idx_tensor, 1).cpu() * binwidth - 180
                 label_pitch_cpu = cont_labels_gaze[:,1].float()*np.pi/180
                 label_pitch_cpu = label_pitch_cpu.cpu()
                 label_yaw_cpu = cont_labels_gaze[:,0].float()*np.pi/180
                 label_yaw_cpu = label_yaw_cpu.cpu()
 
-            pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1) * binwidth - 180
-            yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1) * binwidth - 180
+            pitch_predicted = torch.sum(pitch_predicted_ar * idx_tensor, 1) * binwidth - 180
+            yaw_predicted = torch.sum(yaw_predicted_ar * idx_tensor, 1) * binwidth - 180
 
             loss_reg_pitch = reg_criterion(pitch_predicted, label_pitch_cont_gaze)
             loss_reg_yaw = reg_criterion(yaw_predicted, label_yaw_cont_gaze)
 
+            if args.best_bin:
+                y_idx = []
+                for y in yaw_predicted_ar:
+                    y = list(y)
+                    y_max = max(y)
+                    y_idx.append(y.index(y_max))
+                y_idx = torch.Tensor(y_idx)
+
+                p_idx = []
+                for p in pitch_predicted_ar:
+                    p = list(p)
+                    p_max = max(p)
+                    p_idx.append(p.index(p_max))
+                p_idx = torch.Tensor(p_idx)
+
+                # y_idx = yaw.index(max(yaw))
+                # p_idx = pitch.index(max(pitch))
+                y = y_idx * binwidth - 180
+                p = p_idx * binwidth - 180
+
+                loss_reg_pitch += args.best_bin * reg_criterion(p, label_pitch_cont_gaze)
+                loss_reg_yaw += args.best_bin * reg_criterion(y, label_pitch_cont_gaze)
+
             
-            if epoch > 10 and count <2:
+            if epoch > 10 and count <1:
                 print("L2 loss ", loss_reg_yaw)
                 count += 1
-
 
 
             # Total loss
@@ -437,5 +464,5 @@ if __name__ == '__main__':
 
     plt.legend(loc="upper left")
     plt.locator_params(axis='x', nbins=num_epochs//3)
-    fig.savefig(os.path.join(output,data_set+".png"), format='png')
+    fig.savefig(os.path.join(output,+"vri.png"), format='png')
     # plt.show()
