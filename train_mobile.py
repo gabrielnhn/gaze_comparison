@@ -292,22 +292,25 @@ if __name__ == '__main__':
                     y = list(y)
                     y_max = max(y)
                     y_idx.append(y.index(y_max))
-                y_idx = torch.Tensor(y_idx)
+                y_idx = torch.Tensor(y_idx).cuda(gpu)
 
                 p_idx = []
                 for p in pitch_predicted_ar:
                     p = list(p)
                     p_max = max(p)
                     p_idx.append(p.index(p_max))
-                p_idx = torch.Tensor(p_idx)
+                p_idx = torch.Tensor(p_idx).cuda(gpu)
 
                 # y_idx = yaw.index(max(yaw))
                 # p_idx = pitch.index(max(pitch))
                 y = y_idx * binwidth - 180
                 p = p_idx * binwidth - 180
 
+                # y.cuda(gpu)
+                # p.cuda(gpu)
+
                 loss_reg_pitch += args.best_bin * reg_criterion(p, label_pitch_cont_gaze)
-                loss_reg_yaw += args.best_bin * reg_criterion(y, label_pitch_cont_gaze)
+                loss_reg_yaw += args.best_bin * reg_criterion(y, label_yaw_cont_gaze)
 
             
             if epoch > 10 and count <1:
@@ -364,6 +367,32 @@ if __name__ == '__main__':
 
             loss_reg_pitch = reg_criterion(pitch_predicted, mirror_pitch_cont)
             loss_reg_yaw = reg_criterion(yaw_predicted, mirror_yaw_cont)
+
+            if args.best_bin:
+                y_idx = []
+                for y in yaw_predicted_ar:
+                    y = list(y)
+                    y_max = max(y)
+                    y_idx.append(y.index(y_max))
+                y_idx = torch.Tensor(y_idx).cuda(gpu)
+
+                p_idx = []
+                for p in pitch_predicted_ar:
+                    p = list(p)
+                    p_max = max(p)
+                    p_idx.append(p.index(p_max))
+                p_idx = torch.Tensor(p_idx).cuda(gpu)
+
+                # y_idx = yaw.index(max(yaw))
+                # p_idx = pitch.index(max(pitch))
+                y = y_idx * binwidth - 180
+                p = p_idx * binwidth - 180
+
+                # y.cuda(gpu)
+                # p.cuda(gpu)
+
+                loss_reg_pitch += args.best_bin * reg_criterion(p, label_pitch_cont_gaze)
+                loss_reg_yaw += args.best_bin * reg_criterion(y, label_yaw_cont_gaze)
 
             # Total loss
             loss_pitch_gaze += alpha * loss_reg_pitch
