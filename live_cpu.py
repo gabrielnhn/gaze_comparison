@@ -5,6 +5,7 @@ import time
 from datetime import datetime as dt
 import queue
 import threading
+import math
 
 import torch
 import torch.nn as nn
@@ -132,6 +133,7 @@ if __name__ == '__main__':
     with torch.no_grad():
         last_sec = dt.now().second
         retval, frame = cap.read() 
+        im_width, im_height, _ = frame.shape
         frame_count = 0
         should_calculate = False
 
@@ -182,8 +184,33 @@ if __name__ == '__main__':
                         # draw_gaze(x_min,y_min,bbox_width, bbox_height,frame,(yaw_predicted,pitch_predicted),color=(185, 240, 113), scale=1, thickness=4, size=x_max-x_min, bbox=((x_min, y_min), (x_max, y_max)))
                         # cv2.putText(frame,str(frame_count),(10, 30),cv2.FONT_HERSHEY_PLAIN, 2,(100, 200, 150),2) 
                         cv2.putText(frame,f"{chr(pressed)}",(10, 50),cv2.FONT_HERSHEY_PLAIN, 2,(100, 200, 150),2) 
+                        cv2.rectangle(frame, (x_min, y_min),
+                        (x_max, y_max),
+                        (0, 0, 255),
+                        2,)
+                        head_size = 150 # my head (milimetres)
 
-                        print(f"Pressed {chr(pressed)}, on {yaw,pitch}")
+                        focalLength = 18.7
+                        perWidth = bbox_width * 0.3
+                        d = (head_size * focalLength) / perWidth
+                        # print("BBOX", bbox_width)
+
+                        # print(y_min, y_max)
+                        head_height_pix = im_height - y_min
+                        head_height_cm = head_height_pix * head_size / bbox_height
+                        # regrinha de 3
+                        # head_height_cm (TOBEFOUND)-> head_height_pix 
+                        # head_size -> bbox_height
+
+                        print("DISTANCE", d)
+                        print("PITCH", pitch)
+                        h = math.tan(-pitch_predicted) * d
+                        # h = math.sin(-pitch_predicted) * d
+                        print("HEIGHT PREDICTED", h)
+
+
+
+                        # print(f"Pressed {chr(pressed)}, on {yaw,pitch}")
                         x_list.append((yaw,pitch,(x_min + x_max)//2, (y_min+y_max)//2))
                         y_list.append(chr(pressed))
 
