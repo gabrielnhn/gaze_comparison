@@ -3,6 +3,8 @@ import numpy as np
 import cv2
 import time
 from datetime import datetime as dt
+import queue
+import threading
 
 import torch
 import torch.nn as nn
@@ -21,6 +23,38 @@ from model import VRI_GazeNet
 import os
 
 import pickle
+
+
+class VideoCapture:
+
+  def __init__(self, name):
+    self.cap = cv2.VideoCapture(name)
+    self.q = queue.Queue()
+    t = threading.Thread(target=self._reader)
+    t.daemon = True
+    # t.daemon = False
+    self.event = threading.Event()
+    self.event.set()
+    
+    t.start()
+
+
+  # read frames as soon as they are available, keeping only most recent one
+  def _reader(self):
+    while self.event.is_set():
+      ret, frame = self.cap.read()
+      if not ret:
+        break
+      if not self.q.empty():
+        try:
+          self.q.get_nowait()   # discard previous (unprocessed) frame
+        except queue.Empty:
+          pass
+      self.q.put(frame)
+
+  def read(self):
+    return True, self.q.get()
+
 
 def parse_args():
     """Parse input arguments."""
@@ -81,11 +115,13 @@ if __name__ == '__main__':
     idx_tensor = torch.FloatTensor(idx_tensor).cpu()
 
 
-    cap = cv2.VideoCapture(0)
+    # cap = cv2.VideoCapture(0)
+    cap = VideoCapture(0)
+    # print("setting buf", cap.set(cv2.CAP_PROP_BUFFERSIZE, 0))
 
     # Check if the webcam is opened correctly
-    if not cap.isOpened():
-        raise IOError("Cannot open video")
+    # if not cap.isOpened():
+    #     raise IOError("Cannot open video")
 
     # print('Processing video...')
     x_list = []
@@ -97,6 +133,9 @@ if __name__ == '__main__':
         last_sec = dt.now().second
         retval, frame = cap.read() 
         frame_count = 0
+        should_calculate = False
+
+
         while retval:
             sec = dt.now().second
             if sec == last_sec:
@@ -105,47 +144,45 @@ if __name__ == '__main__':
                 last_sec = sec
                 frame_count = 0
 
-            faces = detector(frame)
-            if faces is not None: 
-                for box, landmarks, score in faces:
-                    if score < .98:
-                        continue
-                    x_min=int(box[0])
-                    if x_min < 0:
-                        x_min = 0
-                    y_min=int(box[1])
-                    if y_min < 0:
-                        y_min = 0
-                    x_max=int(box[2])
-                    y_max=int(box[3])
-                    bbox_width = x_max - x_min
-                    bbox_height = y_max - y_min
-                    # Crop image
-                    img = frame[y_min:y_max, x_min:x_max]
-                    img = cv2.resize(img, (224, 224))
-                    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-                    im_pil = Image.fromarray(img)
-                    img=transformations(im_pil)
-                    # img  = Variable(img).cuda(gpu)
-                    img  = Variable(img).cpu()
-                    img  = img.unsqueeze(0) 
-                    
-                    # gaze prediction
-                    gazes = model.angles(img)
-                    yaw, pitch = gazes[0]
-                    # print(yaw, pitch)
-                    
-                    yaw_predicted= yaw * np.pi/180.0
-                    pitch_predicted= pitch * np.pi/180.0
-                    
-                    draw_gaze(x_min,y_min,bbox_width, bbox_height,frame,(yaw_predicted,pitch_predicted),color=(185, 240, 113), scale=1, thickness=4, size=x_max-x_min, bbox=((x_min, y_min), (x_max, y_max)))
-                    cv2.putText(frame,str(frame_count),(10, 30),cv2.FONT_HERSHEY_PLAIN, 2,(100, 200, 150),2) 
-                    cv2.putText(frame,f"{yaw, pitch}",(10, 50),cv2.FONT_HERSHEY_PLAIN, 2,(100, 200, 150),2) 
-                    cv2.imshow("FRAME", frame)
+            if should_calculate:
 
-                    pressed = cv2.waitKey(33) % 256
-                    if chr(pressed) != "ÿ" and pressed != 27:
-                        should_calculate = True
+                faces = detector(frame)
+                if faces is not None: 
+                    for box, landmarks, score in faces:
+                        if score < .98:
+                            continue
+                        x_min=int(box[0])
+                        if x_min < 0:
+                            x_min = 0
+                        y_min=int(box[1])
+                        if y_min < 0:
+                            y_min = 0
+                        x_max=int(box[2])
+                        y_max=int(box[3])
+                        bbox_width = x_max - x_min
+                        bbox_height = y_max - y_min
+                        # Crop image
+                        img = frame[y_min:y_max, x_min:x_max]
+                        img = cv2.resize(img, (224, 224))
+                        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                        im_pil = Image.fromarray(img)
+                        img=transformations(im_pil)
+                        # img  = Variable(img).cuda(gpu)
+                        img  = Variable(img).cpu()
+                        img  = img.unsqueeze(0) 
+                        
+                        # gaze prediction
+                        gazes = model.angles(img)
+                        yaw, pitch = gazes[0]
+                        # print(yaw, pitch)
+                        
+                        yaw_predicted= yaw * np.pi/180.0
+                        pitch_predicted= pitch * np.pi/180.0
+                        
+                        # draw_gaze(x_min,y_min,bbox_width, bbox_height,frame,(yaw_predicted,pitch_predicted),color=(185, 240, 113), scale=1, thickness=4, size=x_max-x_min, bbox=((x_min, y_min), (x_max, y_max)))
+                        # cv2.putText(frame,str(frame_count),(10, 30),cv2.FONT_HERSHEY_PLAIN, 2,(100, 200, 150),2) 
+                        cv2.putText(frame,f"{chr(pressed)}",(10, 50),cv2.FONT_HERSHEY_PLAIN, 2,(100, 200, 150),2) 
+
                         print(f"Pressed {chr(pressed)}, on {yaw,pitch}")
                         x_list.append((yaw,pitch,(x_min + x_max)//2, (y_min+y_max)//2))
                         y_list.append(chr(pressed))
@@ -153,17 +190,24 @@ if __name__ == '__main__':
                         array = np.array((yaw,pitch,(x_min + x_max)//2, (y_min+y_max)//2))
                         array = np.array([array])
                         print(knn.predict(array))
+                
+            cv2.imshow("FRAME", frame)
+            pressed = cv2.waitKey(0) % 256
+            if chr(pressed) != "ÿ" and pressed != 27:
+                should_calculate = True
+                retval, frame = cap.read()
+                
+            
+            elif pressed == 27:
+                x = np.array(x_list)
+                np.save("X_ARRAY.npy", x)
+
+                y = np.array(y_list)
+                np.save("y_ARRAY.npy", y)
+                print("SAVED.")
+                cap.event.clear()
+                # del cap
+                exit()
 
 
-                    
-                    elif pressed == 27:
-                        x = np.array(x_list)
-                        np.save("X_ARRAY.npy", x)
-
-                        y = np.array(y_list)
-                        np.save("y_ARRAY.npy", y)
-                        print("SAVED.")
-                        exit()
-
-
-            retval, frame = cap.read() 
+             
