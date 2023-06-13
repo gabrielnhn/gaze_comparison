@@ -217,8 +217,10 @@ if __name__ == '__main__':
             # avg_MAE_val.append(v)
             # x = ''.join(filter(lambda i: i.isdigit(), epochs))
             logger = f"[{epochs}] SUM Total Num:{total},MAE_180:{results[0]}, MAE_90:{results[1]}, MAE_40:{results[2]}\n"
+            print(logger)
             logger = f"[{epochs}] ONE Total Num:{total},MAE_180:{results2[0]}, MAE_90:{results2[1]}, MAE_40:{results2[2]}\n"
             print(logger)
+            
             # epoch_list.append(x)
             total_results.append(results)
             total_results2.append(results2)
