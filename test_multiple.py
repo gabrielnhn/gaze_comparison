@@ -176,15 +176,15 @@ if __name__ == '__main__':
                         label_yaw = cont_labels[:,0].float()*np.pi/180
                         label_pitch = cont_labels[:,1].float()*np.pi/180
 
-                        yaw_predicted, pitch_predicted = model(images)
+                        yaw_predicted_ar, pitch_predicted_ar = model(images)
                         
                         # # Binned predictions
                         # _, pitch_bpred = torch.max(pitch_predicted.data, 1)
                         # _, yaw_bpred = torch.max(yaw_predicted.data, 1)
             
                         # mapping from binned (0 to 28) to angels (-180 to 180)  
-                        pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
-                        yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
+                        pitch_predicted = torch.sum(pitch_predicted_ar * idx_tensor, 1).cpu() * binwidth - 180
+                        yaw_predicted = torch.sum(yaw_predicted_ar * idx_tensor, 1).cpu() * binwidth - 180
 
                         pitch_predicted = pitch_predicted*np.pi/180
                         yaw_predicted = yaw_predicted*np.pi/180
