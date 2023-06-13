@@ -193,22 +193,15 @@ if __name__ == '__main__':
                             avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
 
 
-                        y_idx = []
-                        for y in yaw_predicted_ar:
-                            y = list(y)
-                            y_max = max(y)
-                            y_idx.append(y.index(y_max))
-                        y_idx = torch.Tensor(y_idx).cuda(gpu)
-
-                        p_idx = []
-                        for p in pitch_predicted_ar:
-                            p = list(p)
-                            p_max = max(p)
-                            p_idx.append(p.index(p_max))
-                        p_idx = torch.Tensor(p_idx).cuda(gpu)
+                        y_idx = torch.argmax(yaw_predicted_ar, dim=1).cuda(gpu)
+                        p_idx = torch.argmax(pitch_predicted_ar, dim=1).cuda(gpu)
 
                         y = y_idx * binwidth - 180
                         p = p_idx * binwidth - 180
+
+                        pitch_predicted = pitch_predicted*np.pi/180
+                        yaw_predicted = yaw_predicted*np.pi/180
+
                         for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
                             avg_error2 += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
             
