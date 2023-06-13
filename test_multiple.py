@@ -142,6 +142,9 @@ if __name__ == '__main__':
         folder.sort(key=natural_keys)
         # model = ML2CS180()
 
+        total_results = []
+        total_results2 = []
+
         for epochs in folder:
             # Base network structure
 
@@ -159,10 +162,12 @@ if __name__ == '__main__':
             with torch.no_grad():           
                 
                 results = []
+                results2 = []
 
                 for test_loader in (test_loader_all, test_loader_front, test_loader_front_facing):
                     total = 0
                     avg_error = .0
+                    avg_error2 = .0
 
                     for j, (images, labels, cont_labels, name) in enumerate(test_loader):
                         images = Variable(images).cuda(gpu)
@@ -173,9 +178,9 @@ if __name__ == '__main__':
 
                         yaw_predicted, pitch_predicted = model(images)
                         
-                        # Binned predictions
-                        _, pitch_bpred = torch.max(pitch_predicted.data, 1)
-                        _, yaw_bpred = torch.max(yaw_predicted.data, 1)
+                        # # Binned predictions
+                        # _, pitch_bpred = torch.max(pitch_predicted.data, 1)
+                        # _, yaw_bpred = torch.max(yaw_predicted.data, 1)
             
                         # mapping from binned (0 to 28) to angels (-180 to 180)  
                         pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
@@ -186,19 +191,50 @@ if __name__ == '__main__':
 
                         for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
                             avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
+
+
+                        y_idx = []
+                        for y in yaw_predicted_ar:
+                            y = list(y)
+                            y_max = max(y)
+                            y_idx.append(y.index(y_max))
+                        y_idx = torch.Tensor(y_idx).cuda(gpu)
+
+                        p_idx = []
+                        for p in pitch_predicted_ar:
+                            p = list(p)
+                            p_max = max(p)
+                            p_idx.append(p.index(p_max))
+                        p_idx = torch.Tensor(p_idx).cuda(gpu)
+
+                        y = y_idx * binwidth - 180
+                        p = p_idx * binwidth - 180
+                        for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
+                            avg_error2 += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
             
                     t = avg_error/total
                     results.append(t)
+
+                    t = avg_error2/total
+                    results2.append(t)
 
 
             # avg_MAE_test.append(t)
             # v = avg_error/total
             # avg_MAE_val.append(v)
             # x = ''.join(filter(lambda i: i.isdigit(), epochs))
-            logger = f"[{epochs}] Total Num:{total},MAE_180:{results[0]}, MAE_90:{results[1]}, MAE_40:{results[2]}\n"
+            logger = f"[{epochs}] SUM Total Num:{total},MAE_180:{results[0]}, MAE_90:{results[1]}, MAE_40:{results[2]}\n"
+            logger = f"[{epochs}] ONE Total Num:{total},MAE_180:{results2[0]}, MAE_90:{results2[1]}, MAE_40:{results2[2]}\n"
             print(logger)
             # epoch_list.append(x)
+            total_results.append(results)
+            total_results2.append(results2)
     
+
+    print("")
+
+    print(f"Best 1 {max(total_results), total_results.index(max(total_results))}")
+    print(f"Best 2 {max(total_results), total_results.index(max(total_results))}")
 
     # epoch_list = list(range(len(folder)))
     # fig = plt.figure()        
