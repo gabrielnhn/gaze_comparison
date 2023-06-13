@@ -193,8 +193,9 @@ if __name__ == '__main__':
                             avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
 
 
-                        y_idx = torch.argmax(yaw_predicted_ar, dim=1).cuda(gpu)
-                        p_idx = torch.argmax(pitch_predicted_ar, dim=1).cuda(gpu)
+                        # y_idx = torch.argmax(yaw_predicted_ar, dim=1).cuda(gpu)
+                        y_idx = torch.argmax(yaw_predicted_ar, dim=1).cpu()
+                        p_idx = torch.argmax(pitch_predicted_ar, dim=1).cpu()
 
                         y = y_idx * binwidth - 180
                         p = p_idx * binwidth - 180
