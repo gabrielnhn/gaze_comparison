@@ -199,8 +199,8 @@ if __name__ == '__main__':
                         y = y_idx * binwidth - 180
                         p = p_idx * binwidth - 180
 
-                        pitch_predicted = pitch_predicted*np.pi/180
-                        yaw_predicted = yaw_predicted*np.pi/180
+                        pitch_predicted = p*np.pi/180
+                        yaw_predicted = y*np.pi/180
 
                         for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
                             avg_error2 += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
