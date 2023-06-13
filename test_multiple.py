@@ -194,14 +194,14 @@ if __name__ == '__main__':
 
 
                         # y_idx = torch.argmax(yaw_predicted_ar, dim=1).cuda(gpu)
-                        y_idx = torch.argmax(yaw_predicted_ar, dim=1).cpu()
-                        p_idx = torch.argmax(pitch_predicted_ar, dim=1).cpu()
+                        y_idx = torch.argmax(yaw_predicted_ar, dim=1).cpu() * binwidth - 180
+                        p_idx = torch.argmax(pitch_predicted_ar, dim=1).cpu() * binwidth - 180
 
-                        y = y_idx * binwidth - 180
-                        p = p_idx * binwidth - 180
+                        # y = y_idx * binwidth - 180
+                        # p = p_idx * binwidth - 180
 
-                        pitch_predicted = p*np.pi/180
-                        yaw_predicted = y*np.pi/180
+                        yaw_predicted = y_idx*np.pi/180
+                        pitch_predicted = p_idx*np.pi/180
 
                         # print(pitch_predicted, len(pitch_predicted))
                         print(yaw_predicted, len(yaw_predicted))
