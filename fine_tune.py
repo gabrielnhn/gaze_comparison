@@ -305,8 +305,8 @@ if __name__ == '__main__':
             yaw_predicted_ar, pitch_predicted_ar = model(mirror_image)
 
             # Cross entropy loss
-            loss_pitch_gaze = beta * criterion(pitch_predicted, mirror_pitch_bin)
-            loss_yaw_gaze = beta * criterion(yaw_predicted, mirror_yaw_bin)
+            loss_pitch_gaze = beta * criterion(pitch_predicted_ar, mirror_pitch_bin)
+            loss_yaw_gaze = beta * criterion(yaw_predicted_ar, mirror_yaw_bin)
 
             with torch.no_grad():
                 pitch_predicted_cpu = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
@@ -367,8 +367,8 @@ if __name__ == '__main__':
                 # yaw_predicted = softmax(gaze_yaw)
                 
                 # mapping from binned (0 to 28) to angels (-180 to 180)  
-                pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
-                yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
+                pitch_predicted = torch.sum(pitch_predicted_ar * idx_tensor, 1).cpu() * binwidth - 180
+                yaw_predicted = torch.sum(yaw_predicted_ar * idx_tensor, 1).cpu() * binwidth - 180
 
                 pitch_predicted = pitch_predicted*np.pi/180
                 yaw_predicted = yaw_predicted*np.pi/180
