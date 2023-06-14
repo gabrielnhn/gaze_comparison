@@ -426,5 +426,5 @@ if __name__ == '__main__':
 
     plt.legend(loc="upper left")
     plt.locator_params(axis='x', nbins=num_epochs//3)
-    fig.savefig(os.path.join(output,+"vri.png"), format='png')
+    fig.savefig(os.path.join(output,"vri.png"), format='png')
     # plt.show()

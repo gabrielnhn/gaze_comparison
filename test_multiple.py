@@ -232,8 +232,8 @@ if __name__ == '__main__':
 
     print("")
 
-    print(f"Best 1 {max(total_results), total_results.index(max(total_results))}")
-    print(f"Best 2 {max(total_results), total_results.index(max(total_results))}")
+    print(f"Best 1 {min(total_results), total_results.index(max(total_results))}")
+    print(f"Best 2 {min(total_results), total_results.index(max(total_results))}")
 
     # epoch_list = list(range(len(folder)))
     # fig = plt.figure()        
