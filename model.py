@@ -72,7 +72,8 @@ class L2CS(nn.Module):
 
 class VRI_GazeNet(nn.Module):
     
-    def __init__(self, num_bins=181):
+    def __init__(self, num_bins=181, freeze=False):
+        self.freeze = freeze
         self.num_bins = num_bins
         self.binwidth = int(360/(self.num_bins-1))
 
@@ -81,6 +82,11 @@ class VRI_GazeNet(nn.Module):
         # mobilenet_v2 = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V2', dropout=0.3)
         mobilenet_v2 = torchvision.models.mobilenet_v2(weights='IMAGENET1K_V1')
         self.backbone = mobilenet_v2.features
+
+        if self.freeze:
+            for param in self.backbone.parameters():
+                param.requires_grad = False
+
         
         classifier_dict = mobilenet_v2.classifier.state_dict()
         classifier_dict["weight"] = classifier_dict["1.weight"]

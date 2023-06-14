@@ -13,6 +13,7 @@ from model import L2CS
 import torchvision
 import sys
 
+
 def atoi(text):
     return int(text) if text.isdigit() else text
 
@@ -34,6 +35,11 @@ def gazeto3d(gaze):
 def angular(gaze, label):
   total = np.sum(gaze * label)
   return np.arccos(min(total/(np.linalg.norm(gaze)* np.linalg.norm(label)), 0.9999999))*180/np.pi
+
+def angular_torch(gaze, label):
+  total = torch.sum(gaze * label)
+  return np.arccos(min(total/(np.linalg.norm(gaze)* np.linalg.norm(label)), 0.9999999))*180/np.pi
+
 
 def draw_gaze(a,b,c,d,image_in, yawpitch, thickness=5, color=(255, 255, 255),scale=2.0, size=0, bbox=None, tip=True):
     """Draw gaze angle on given image with a given eye positions."""
