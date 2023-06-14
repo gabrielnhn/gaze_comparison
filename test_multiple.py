@@ -206,14 +206,14 @@ if __name__ == '__main__':
                         # print(pitch_predicted, len(pitch_predicted))
                         # print(yaw_predicted, len(yaw_predicted))
 
-                        for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
-                            avg_error2 += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
+                        # for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
+                        #     avg_error2 += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
             
                     t = avg_error/total
                     results.append(t)
 
-                    t = avg_error2/total
-                    results2.append(t)
+                    # t = avg_error2/total
+                    # results2.append(t)
 
 
             # avg_MAE_test.append(t)
@@ -222,18 +222,18 @@ if __name__ == '__main__':
             # x = ''.join(filter(lambda i: i.isdigit(), epochs))
             logger = f"[{epochs}] SUM Total Num:{total},MAE_180:{results[0]}, MAE_90:{results[1]}, MAE_40:{results[2]}\n"
             print(logger)
-            logger = f"[{epochs}] ONE Total Num:{total},MAE_180:{results2[0]}, MAE_90:{results2[1]}, MAE_40:{results2[2]}\n"
-            print(logger)
+            # logger = f"[{epochs}] ONE Total Num:{total},MAE_180:{results2[0]}, MAE_90:{results2[1]}, MAE_40:{results2[2]}\n"
+            # print(logger)
             
             # epoch_list.append(x)
             total_results.append(results)
-            total_results2.append(results2)
+            # total_results2.append(results2)
     
 
     print("")
 
     print(f"Best 1 {min(total_results), total_results.index(max(total_results))}")
-    print(f"Best 2 {min(total_results), total_results.index(max(total_results))}")
+    # print(f"Best 2 {min(total_results), total_results.index(max(total_results))}")
 
     # epoch_list = list(range(len(folder)))
     # fig = plt.figure()        
