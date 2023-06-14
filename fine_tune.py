@@ -268,7 +268,7 @@ if __name__ == '__main__':
             loss_yaw_gaze = beta * criterion(yaw_predicted_ar, label_yaw_gaze)
 
             with torch.no_grad():
-                print(len(pitch_predicted_ar))
+                print(len(pitch_predicted_ar[0]))
                 print(len(idx_tensor))
                 pitch_predicted_cpu = torch.sum(pitch_predicted_ar * idx_tensor, 1).cpu() * binwidth - 180
                 yaw_predicted_cpu = torch.sum(yaw_predicted_ar * idx_tensor, 1).cpu() * binwidth - 180
