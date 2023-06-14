@@ -71,7 +71,7 @@ class Gaze360(Dataset):
         # print(self.num_bins)
         bins = np.array(range(-1*self.num_bins//2, self.num_bins//2 + self.binwidth, self.binwidth))
         # print(bins)
-        binned_pose = np.digitize([yaw, pitch], bins) - 1
+        binned_pose = np.digitize([yaw, pitch], bins)
 
         # print(binned_pose)
         labels = binned_pose
@@ -160,7 +160,7 @@ class Mpiigaze(Dataset):
     bins = np.array(range(-1*self.num_bins//2, self.num_bins//2 + self.binwidth, self.binwidth))
     # print(bins)
 
-    binned_pose = np.digitize([yaw, pitch], bins) - 1
+    binned_pose = np.digitize([yaw, pitch], bins)
     # print(binned_pose)
 
 
