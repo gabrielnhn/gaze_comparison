@@ -153,7 +153,7 @@ class Mpiigaze(Dataset):
     
     # Bin values
     # bins = np.array(range(-1*self.angle, self.angle, self.binwidth))
-    bins = np.array(range(-1*self.num_bins//2, self.num_bins//2, self.binwidth))
+    bins = np.array(range(-1*self.num_bins//2, self.num_bins//2 + self.binwidth, self.binwidth))
 
     binned_pose = np.digitize([yaw, pitch], bins) - 1
 
