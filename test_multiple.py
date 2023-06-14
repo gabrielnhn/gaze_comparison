@@ -110,7 +110,7 @@ if __name__ == '__main__':
         folder = os.listdir(args.gaze360label_dir_test)
         folder.sort()
         testlabelpathombined = [os.path.join(args.gaze360label_dir_test, j) for j in folder]
-        gaze_dataset_test_all=datasets.Gaze360(args.gaze360label_file_test,args.gaze360image_dir_test, transformations, 180, binwidth)
+        gaze_dataset_test_all=datasets.Gaze360(args.gaze360label_file_test,args.gaze360image_dir_test, transformations, 180, binwidth, num_bins=model.num_bins-1)
         test_loader_all = torch.utils.data.DataLoader(
             dataset=gaze_dataset_test_all,
             batch_size=batch_size,
@@ -118,7 +118,7 @@ if __name__ == '__main__':
             num_workers=4,
             pin_memory=True)
 
-        gaze_dataset_test_front=datasets.Gaze360(args.gaze360label_file_test,args.gaze360image_dir_test, transformations, 90, binwidth)
+        gaze_dataset_test_front=datasets.Gaze360(args.gaze360label_file_test,args.gaze360image_dir_test, transformations, 90, binwidth, num_bins=model.num_bins-1)
         test_loader_front = torch.utils.data.DataLoader(
             dataset=gaze_dataset_test_front,
             batch_size=batch_size,
@@ -126,7 +126,7 @@ if __name__ == '__main__':
             num_workers=4,
             pin_memory=True)
 
-        gaze_dataset_test_front_facing=datasets.Gaze360(args.gaze360label_file_test,args.gaze360image_dir_test, transformations, 40, binwidth)
+        gaze_dataset_test_front_facing=datasets.Gaze360(args.gaze360label_file_test,args.gaze360image_dir_test, transformations, 40, binwidth, num_bins=model.num_bins-1)
         test_loader_front_facing = torch.utils.data.DataLoader(
             dataset=gaze_dataset_test_front_facing,
             batch_size=batch_size,

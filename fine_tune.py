@@ -160,12 +160,12 @@ if __name__ == '__main__':
     # testlabelpathombined = [os.path.join(args.gaze360label_dir_train, j) for j in folder] 
 
     if args.augment:
-        gaze360=datasets.Gaze360(args.gaze360label_file_train, args.gaze360image_dir_train, train_transform, args.angle, binwidth, bins)
-        mpii = datasets.Mpiigaze(args.gazeMpiilabel_dir, args.gazeMpiimage_dir, train_transform, args.angle, binwidth, bins)
+        gaze360=datasets.Gaze360(args.gaze360label_file_train, args.gaze360image_dir_train, train_transform, args.angle, binwidth, bins-1)
+        mpii = datasets.Mpiigaze(args.gazeMpiilabel_dir, args.gazeMpiimage_dir, train_transform, args.angle, binwidth, bins-1)
 
     else:
-        gaze360=datasets.Gaze360(args.gaze360label_file_train, args.gaze360image_dir_train, val_transform, args.angle, binwidth, bins)
-        mpii = datasets.Mpiigaze(args.gazeMpiilabel_dir, args.gazeMpiimage_dir, val_transform, args.angle, binwidth, bins)
+        gaze360=datasets.Gaze360(args.gaze360label_file_train, args.gaze360image_dir_train, val_transform, args.angle, binwidth, bins-1)
+        mpii = datasets.Mpiigaze(args.gazeMpiilabel_dir, args.gazeMpiimage_dir, val_transform, args.angle, binwidth, bins-1)
 
     
     dataset = ConcatDataset([gaze360, mpii])
@@ -182,7 +182,7 @@ if __name__ == '__main__':
     folder = os.listdir(args.gaze360label_dir_val)
     folder.sort()
     testlabelpathombined = [os.path.join(args.gaze360label_dir_val, j) for j in folder]
-    gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, val_transform, 180, binwidth)
+    gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, val_transform, 180, binwidth, bins-1)
     # gaze_dataset_val=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_val, transformations, 180, binwidth)
     
     val_loader = torch.utils.data.DataLoader(
