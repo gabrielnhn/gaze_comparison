@@ -73,6 +73,7 @@ class Gaze360(Dataset):
         print(bins)
         binned_pose = np.digitize([yaw, pitch], bins) - 1
 
+        print(binned_pose)
         labels = binned_pose
         cont_labels = torch.FloatTensor([yaw, pitch])
 
@@ -160,6 +161,8 @@ class Mpiigaze(Dataset):
     print(bins)
 
     binned_pose = np.digitize([yaw, pitch], bins) - 1
+    print(binned_pose)
+
 
     labels = binned_pose
     cont_labels = torch.FloatTensor([yaw, pitch])
