@@ -160,12 +160,12 @@ if __name__ == '__main__':
     # testlabelpathombined = [os.path.join(args.gaze360label_dir_train, j) for j in folder] 
 
     if args.augment:
-        gaze360=datasets.Gaze360(args.gaze360label_file_train, args.gaze360image_dir_train, train_transform, args.angle, binwidth)
-        mpii = datasets.Mpiigaze(args.gazeMpiilabel_dir, args.gazeMpiimage_dir, train_transform, args.angle, binwidth)
+        gaze360=datasets.Gaze360(args.gaze360label_file_train, args.gaze360image_dir_train, train_transform, args.angle, binwidth, bins)
+        mpii = datasets.Mpiigaze(args.gazeMpiilabel_dir, args.gazeMpiimage_dir, train_transform, args.angle, binwidth, bins)
 
     else:
-        gaze360=datasets.Gaze360(args.gaze360label_file_train, args.gaze360image_dir_train, val_transform, args.angle, binwidth)
-        mpii = datasets.Mpiigaze(args.gazeMpiilabel_dir, args.gazeMpiimage_dir, val_transform, args.angle, binwidth)
+        gaze360=datasets.Gaze360(args.gaze360label_file_train, args.gaze360image_dir_train, val_transform, args.angle, binwidth, bins)
+        mpii = datasets.Mpiigaze(args.gazeMpiilabel_dir, args.gazeMpiimage_dir, val_transform, args.angle, binwidth, bins)
 
     
     dataset = ConcatDataset([gaze360, mpii])

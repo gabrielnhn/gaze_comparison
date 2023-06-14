@@ -11,7 +11,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 
 class Gaze360(Dataset):
-    def __init__(self, path, root, transform, angle, binwidth, train=True):
+    def __init__(self, path, root, transform, angle, binwidth, num_bins, train=True):
         self.transform = transform
         self.root = root
         self.orig_list_len = 0
@@ -76,7 +76,7 @@ class Gaze360(Dataset):
 
 
 class Mpiigaze(Dataset): 
-  def __init__(self, pathorg, root, transform,angle, binwidth, fold=0):
+  def __init__(self, pathorg, root, transform,angle, binwidth, num_bins, fold=0):
     self.transform = transform
     self.root = root
     self.orig_list_len = 0
