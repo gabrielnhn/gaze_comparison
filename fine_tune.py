@@ -270,6 +270,8 @@ if __name__ == '__main__':
             with torch.no_grad():
                 # print(len(pitch_predicted_ar[0]))
                 # print(len(idx_tensor))
+                print(pitch_predicted_ar)
+                print(idx_tensor)
                 pitch_predicted_cpu = torch.sum(pitch_predicted_ar * idx_tensor, 1).cpu() * binwidth - 180
                 yaw_predicted_cpu = torch.sum(yaw_predicted_ar * idx_tensor, 1).cpu() * binwidth - 180
                 label_pitch_cpu = cont_labels_gaze[:,1].float()*np.pi/180
