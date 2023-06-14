@@ -302,7 +302,7 @@ if __name__ == '__main__':
 
             ####### CALCULATE MIRROR
             # mirror_image = augmentation_transform(mirror_image)
-            yaw_predicted, pitch_predicted = model(mirror_image)
+            yaw_predicted_ar, pitch_predicted_ar = model(mirror_image)
 
             # Cross entropy loss
             loss_pitch_gaze = beta * criterion(pitch_predicted, mirror_pitch_bin)
