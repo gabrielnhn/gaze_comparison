@@ -131,7 +131,7 @@ if __name__ == '__main__':
         transforms.Resize(224),
         transforms.RandomApply(torch.nn.ModuleList([
             transforms.ColorJitter(brightness=0.25, contrast=0.25, saturation=0.25, hue=0.25)
-        ]), p=1),
+        ]), p=0.25),
         transforms.ToTensor(),
         transforms.Normalize(
             mean=[0.485, 0.456, 0.406],
@@ -275,10 +275,10 @@ if __name__ == '__main__':
                 label_yaw_cpu = cont_labels_gaze[:,0].float()*np.pi/180
                 label_yaw_cpu = label_yaw_cpu.cpu()
 
-            pitch_predicted = torch.sum(pitch_predicted_ar * idx_tensor, 1) * binwidth - 180
-            yaw_predicted = torch.sum(yaw_predicted_ar * idx_tensor, 1) * binwidth - 180
-            # yaw_predicted = torch.argmax(yaw_predicted_ar, dim=1) * binwidth - 180
-            # pitch_predicted = torch.argmax(pitch_predicted_ar, dim=1) * binwidth - 180
+            # pitch_predicted = torch.sum(pitch_predicted_ar * idx_tensor, 1) * binwidth - 180
+            # yaw_predicted = torch.sum(yaw_predicted_ar * idx_tensor, 1) * binwidth - 180
+            yaw_predicted = torch.argmax(yaw_predicted_ar, dim=1) * binwidth - 180
+            pitch_predicted = torch.argmax(pitch_predicted_ar, dim=1) * binwidth - 180
 
             loss_reg_pitch = reg_criterion(pitch_predicted, label_pitch_cont_gaze)
             loss_reg_yaw = reg_criterion(yaw_predicted, label_yaw_cont_gaze)
@@ -319,10 +319,10 @@ if __name__ == '__main__':
                 label_yaw_cpu = mirror_yaw_cont.float()*np.pi/180
                 label_yaw_cpu = label_yaw_cpu.cpu()
 
-            pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1) * binwidth - 180
-            yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1) * binwidth - 180
-            # yaw_predicted = torch.argmax(yaw_predicted_ar, dim=1) * binwidth - 180
-            # pitch_predicted = torch.argmax(pitch_predicted_ar, dim=1) * binwidth - 180
+            # pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1) * binwidth - 180
+            # yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1) * binwidth - 180
+            yaw_predicted = torch.argmax(yaw_predicted_ar, dim=1) * binwidth - 180
+            pitch_predicted = torch.argmax(pitch_predicted_ar, dim=1) * binwidth - 180
 
             loss_reg_pitch = reg_criterion(pitch_predicted, mirror_pitch_cont)
             loss_reg_yaw = reg_criterion(yaw_predicted, mirror_yaw_cont)
