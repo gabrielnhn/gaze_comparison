@@ -101,8 +101,7 @@ def parse_args():
         '--best_bin', dest='best_bin', help='If best_bin loss',
         default=0, type=float)
     parser.add_argument(
-        '--source_model', dest='source_model', help='Lol',
-        default=0, type=float)
+        '--source_model', dest='source_model', help='Lol', type=str, required=True)
 
 
 
