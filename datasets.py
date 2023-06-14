@@ -12,6 +12,7 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 class Gaze360(Dataset):
     def __init__(self, path, root, transform, angle, binwidth, num_bins, train=True):
+        self.num_bins = num_bins
         self.transform = transform
         self.root = root
         self.orig_list_len = 0
@@ -66,7 +67,8 @@ class Gaze360(Dataset):
                 
         
         # Bin values
-        bins = np.array(range(-1*self.angle, self.angle, self.binwidth))
+        # bins = np.array(range(-1*self.angle, self.angle, self.binwidth))
+        bins = np.array(range(-1*self.num_bins//2, self.num_bins//2, self.binwidth))
         binned_pose = np.digitize([yaw, pitch], bins) - 1
 
         labels = binned_pose
@@ -148,7 +150,9 @@ class Mpiigaze(Dataset):
         img = self.transform(img)        
     
     # Bin values
-    bins = np.array(range(-1*self.angle, self.angle, self.binwidth))
+    # bins = np.array(range(-1*self.angle, self.angle, self.binwidth))
+    bins = np.array(range(-1*self.num_bins//2, self.num_bins//2, self.binwidth))
+
     binned_pose = np.digitize([yaw, pitch], bins) - 1
 
     labels = binned_pose
