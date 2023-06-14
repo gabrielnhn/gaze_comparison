@@ -264,6 +264,8 @@ if __name__ == '__main__':
             ##CALCULATE ORIGINAL
             yaw_predicted_ar, pitch_predicted_ar = model(images_gaze)
 
+            print(label_pitch_gaze)
+            print(label_yaw_gaze)
             loss_pitch_gaze = beta * criterion(pitch_predicted_ar, label_pitch_gaze)
             loss_yaw_gaze = beta * criterion(yaw_predicted_ar, label_yaw_gaze)
 
