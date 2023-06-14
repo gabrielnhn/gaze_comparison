@@ -79,6 +79,8 @@ class Gaze360(Dataset):
 
 class Mpiigaze(Dataset): 
   def __init__(self, pathorg, root, transform,angle, binwidth, num_bins, fold=0):
+    self.num_bins = num_bins
+    
     self.transform = transform
     self.root = root
     self.orig_list_len = 0
