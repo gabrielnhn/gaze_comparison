@@ -224,6 +224,46 @@ if __name__ == '__main__':
 
     beta = args.beta
 
+            model.eval()
+        with torch.no_grad():
+            total = 0
+            # idx_tensor = [idx for idx in range(bins)]
+            # idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
+            avg_error = .0        
+            for j, (images, labels, cont_labels, name) in enumerate(val_loader):
+                images = Variable(images).cuda(gpu)
+                total += cont_labels.size(0)
+
+                label_yaw = cont_labels[:,0].float()*np.pi/180
+                label_pitch = cont_labels[:,1].float()*np.pi/180
+                
+
+                yaw_predicted, pitch_predicted = model(images)
+    
+                # Continuous predictions
+                # pitch_predicted = softmax(gaze_pitch)
+                # yaw_predicted = softmax(gaze_yaw)
+                
+                # mapping from binned (0 to 28) to angels (-180 to 180)  
+                pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
+                yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
+
+                pitch_predicted = pitch_predicted*np.pi/180
+                yaw_predicted = yaw_predicted*np.pi/180
+
+                for p,y,pl,yl in zip(pitch_predicted,yaw_predicted,label_pitch,label_yaw):
+                    avg_error += angular(gazeto3d([p,y]), gazeto3d([pl,yl]))
+                
+        val_loss = avg_error/total
+                
+        # val_loss = (avg_error_val/total_val)
+        # train_loss = (avg_error_train/total_train)
+
+        print(f"Epoch -1: val:{val_loss}")
+
+
+
+
     for epoch in range(num_epochs):
         avg_error_train = 0.0
         total_train = 0
@@ -270,10 +310,6 @@ if __name__ == '__main__':
             loss_yaw_gaze = beta * criterion(yaw_predicted_ar, label_yaw_gaze)
 
             with torch.no_grad():
-                # print(len(pitch_predicted_ar[0]))
-                # print(len(idx_tensor))
-                # print(pitch_predicted_ar)
-                # print(idx_tensor)
                 pitch_predicted_cpu = torch.sum(pitch_predicted_ar * idx_tensor, 1).cpu() * binwidth - 180
                 yaw_predicted_cpu = torch.sum(yaw_predicted_ar * idx_tensor, 1).cpu() * binwidth - 180
                 label_pitch_cpu = cont_labels_gaze[:,1].float()*np.pi/180
