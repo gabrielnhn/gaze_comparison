@@ -224,8 +224,6 @@ if __name__ == '__main__':
         avg_error_train = 0.0
         total_train = 0
 
-        # sum_loss_pitch_gaze = 0
-        # sum_loss_yaw_gaze = 0
         iter_gaze = 0
         count = 0
         
@@ -317,15 +315,6 @@ if __name__ == '__main__':
                 print("L2 loss ", loss_reg_yaw)
                 count += 1
 
-
-            # Total loss
-
-            # if args.reg_only:
-            #     loss_pitch_gaze = loss_reg_pitch
-            #     loss_yaw_gaze = loss_reg_yaw
-            # else:
-            #     loss_pitch_gaze += alpha * loss_reg_pitch
-            #     loss_yaw_gaze += alpha * loss_reg_yaw
             loss_pitch_gaze += alpha * loss_reg_pitch
             loss_yaw_gaze += alpha * loss_reg_yaw
 
@@ -416,8 +405,6 @@ if __name__ == '__main__':
         model.eval()
         with torch.no_grad():
             total = 0
-            # idx_tensor = [idx for idx in range(bins)]
-            # idx_tensor = torch.FloatTensor(idx_tensor).cuda(gpu)
             avg_error = .0        
             for j, (images, labels, cont_labels, name) in enumerate(val_loader):
                 images = Variable(images).cuda(gpu)
@@ -429,10 +416,6 @@ if __name__ == '__main__':
 
                 yaw_predicted, pitch_predicted = model(images)
     
-                # Continuous predictions
-                # pitch_predicted = softmax(gaze_pitch)
-                # yaw_predicted = softmax(gaze_yaw)
-                
                 # mapping from binned (0 to 28) to angels (-180 to 180)  
                 pitch_predicted = torch.sum(pitch_predicted * idx_tensor, 1).cpu() * binwidth - 180
                 yaw_predicted = torch.sum(yaw_predicted * idx_tensor, 1).cpu() * binwidth - 180
@@ -445,7 +428,7 @@ if __name__ == '__main__':
                 
         val_loss = avg_error/total
                 
-        # val_loss = (avg_error_val/total_val)
+        val_loss = (avg_error_val/total_val)
         train_loss = (avg_error_train/total_train)
 
         print(f"Epoch {epoch}: val:{val_loss} ; train:{train_loss}")
@@ -471,27 +454,21 @@ if __name__ == '__main__':
 
     print(F'BEST EPOCH (VAL): {best_val_epoch}')
     print(F'BEST LOSS (VAL): {best_val_loss}')
-    # print("Saving best model...")
-    # torch.save(best_val_state_dict, output +'/'+'_best_val_' + str(best_val_epoch) + '.pkl')
-    # print("Saved")
-
     print(F'BEST EPOCH (train): {best_train_epoch}')
     print(F'BEST LOSS (train): {best_train_loss}')
-    # print("Saving best model...")
-    # torch.save(best_train_state_dict, output +'/'+'_best_train_' + str(best_train_epoch) + '.pkl')
-    # print("Saved")
     
-    print("Generating plot..")
-    epoch_list = list(range(num_epochs))
-    
-    fig = plt.figure()        
-    plt.xlabel('Epoch')
-    plt.ylabel('MAE (degrees)')
-    plt.title('Mean angular error')
-    plt.plot(epoch_list, avg_MAE_train, color='b', label='train')
-    plt.plot(epoch_list, avg_MAE_val, color='g', label='validation')
 
-    plt.legend(loc="upper left")
-    plt.locator_params(axis='x', nbins=num_epochs//3)
-    fig.savefig(os.path.join(output,+"vri.png"), format='png')
+    # print("Generating plot..")
+    # epoch_list = list(range(num_epochs))
+    
+    # fig = plt.figure()        
+    # plt.xlabel('Epoch')
+    # plt.ylabel('MAE (degrees)')
+    # plt.title('Mean angular error')
+    # plt.plot(epoch_list, avg_MAE_train, color='b', label='train')
+    # plt.plot(epoch_list, avg_MAE_val, color='g', label='validation')
+
+    # plt.legend(loc="upper left")
+    # plt.locator_params(axis='x', nbins=num_epochs//3)
+    # fig.savefig(os.path.join(output,+"vri.png"), format='png')
     # plt.show()

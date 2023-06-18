@@ -12,7 +12,6 @@ import torch.backends.cudnn as cudnn
 import torchvision
 
 import datasets
-# from model import ML2CS, ML2CS180
 from model import VRI_GazeNet
 from utils import select_device, natural_keys, gazeto3d, angular
 import numpy as np

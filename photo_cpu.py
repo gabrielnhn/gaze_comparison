@@ -28,7 +28,7 @@ def parse_args():
         default="0", type=str)
     parser.add_argument(
         '--snapshot',dest='snapshot', help='Path of model snapshot.', 
-        default='models/ML2CS.pkl', type=str)
+        default='models/VRI-GazeNet.pkl', type=str)
         
 
     parser.add_argument(
@@ -75,8 +75,7 @@ if __name__ == '__main__':
         )
     ])
     
-    # model = ML2CS180()
-    model = VRI_GazeNet(num_bins=180)
+    model = VRI_GazeNet(num_bins=181)
     print('Loading snapshot.')
     saved_state_dict = torch.load(snapshot_path, map_location=torch.device('cpu'))
     model.load_state_dict(saved_state_dict)
