@@ -51,6 +51,8 @@ def draw_gaze(a,b,c,d,image_in, yawpitch, thickness=5, color=(255, 255, 255),sca
         thickness = 1
 
     image_out = image_in
+    print(image_out.shape, "IMOUTSHAPE")
+
     (h, w) = image_in.shape[:2]
     length = size/2 * scale
     if len(image_out.shape) == 2 or image_out.shape[2] == 1:

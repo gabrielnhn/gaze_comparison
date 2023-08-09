@@ -127,31 +127,47 @@ if __name__ == '__main__':
         start = datetime.datetime.now()
         with torch.no_grad():
             for i, (images_gaze, labels_gaze, cont_labels_gaze, name) in enumerate(test_loader_original):
-                images = Variable(images_gaze).cuda(gpu)
-                gazes = model.angles_gpu(images, gpu)
-                yaw_predicted, pitch_predicted = gazes[0]
+                print("Processing")
 
-                images_np = images_gaze[0].cpu().numpy()  # Access the first image from the batch and convert to NumPy array
-                images_pil = to_pil(images_gaze[0])  # Access the first image from the batch and convert to PIL Image
+                # print("ORIGIN SHAPE", images_gaze.shape)
 
-                # Draw ground truth in yellow
-                ground_truth_yaw = cont_labels_gaze[i, 0] * np.pi / 180.0
-                ground_truth_pitch = cont_labels_gaze[i, 1] * np.pi / 180.0
-                draw_gaze(0, 0, images_gaze.shape[3], images_gaze.shape[2], images_np, (ground_truth_yaw, ground_truth_pitch), color=(255, 255, 0), scale=1, thickness=4, size=images_gaze.shape[3], bbox=((0, 0), (images_gaze.shape[3], images_gaze.shape[2])))
+                image_gaze = images_gaze[0]  # Get the first image from the batch
 
-                # Draw predicted gaze in blue
-                images_normalized = transformations(images_gaze)  # Apply transformations to the original image
-                images_normalized = images_normalized.unsqueeze(0).cuda(gpu)  # Add batch dimension and move to GPU
-                gazes_model = model.angles_gpu(images_normalized, gpu)
-                yaw_predicted_model, pitch_predicted_model = gazes_model[0]
-                draw_gaze(0, 0, images_gaze.shape[3], images_gaze.shape[2], images_np, (yaw_predicted_model, pitch_predicted_model), color=(0, 0, 255), scale=1, thickness=4, size=images_gaze.shape[3], bbox=((0, 0), (images_gaze.shape[3], images_gaze.shape[2])))
+                # print(image_gaze.shape, "SHAPE in 0", image_gaze.type)
 
-                cv2.imwrite("gaze_" + name[0] + ".jpg", images_pil)
+                image_model = Variable(transformations(to_pil(image_gaze))).cuda(gpu).unsqueeze(0)
+
+                with torch.no_grad():
+                    gazes = vri.angles_gpu(image_model, gpu)
+                    yaw_predicted, pitch_predicted = gazes[0]
+
+                array = image_gaze.numpy()
+                image_gaze_np = np.transpose(array, (1, 2, 0))  # Reorder dimensions to (height, width, channels)
+                image_gaze_np = (image_gaze_np * 255).astype(np.uint8)  # Convert to 8-bit integer values
+
+
+                print(image_gaze_np.shape, "SHAPE NP")
+
+                images_drawn = draw_gaze(0, 0, image_gaze_np.shape[2], image_gaze_np.shape[1], image_gaze_np,
+                                        (cont_labels_gaze[i, 0] * np.pi / 180.0, cont_labels_gaze[i, 1] * np.pi / 180.0),
+                                        color=(255, 255, 0), scale=1, thickness=4, size=image_gaze.shape[2],
+                                        bbox=((0, 0), (image_gaze_np.shape[2], image_gaze_np.shape[1])))
+
+                # draw_gaze(x_min,y_min,bbox_width, bbox_height,frame,(yaw_predicted,pitch_predicted),color=(185, 240, 113), scale=1, thickness=4, size=x_max-x_min, bbox=((x_min, y_min), (x_max, y_max)))
+                    
+
+                images_drawn = draw_gaze(0, 0, image_gaze_np.shape[2], image_gaze_np.shape[1], images_drawn,
+                                        (yaw_predicted, pitch_predicted),
+                                        color=(0, 0, 255), scale=1, thickness=4, size=image_gaze.shape[2],
+                                        bbox=((0, 0), (image_gaze_np.shape[2], image_gaze_np.shape[1])))
+
+                print("saving, ", cv2.imwrite("gaze_" + name[0] + ".jpg", images_drawn))
                 save_counter += 1
 
                 if save_counter >= 20:
                     print("SAVED ALL")
-                    break  # Stop processing after saving 20 images
+                    break
+
 
 
         end = datetime.datetime.now()
