@@ -133,3 +133,10 @@ class VRI_GazeNet(nn.Module):
         yaw_predicted_cpu = torch.sum(y * self.idx_tensor, 1).cpu().detach().numpy() * self.binwidth - 180
         return list(zip(yaw_predicted_cpu, pitch_predicted_cpu))
 
+    def angles_gpu(self, images, gpu):
+        y, p = self.forward(images)
+        idx_tensor = self.idx_tensor.cuda(gpu)
+        pitch_predicted_cpu = torch.sum(p * idx_tensor, 1).cpu().detach().numpy() * self.binwidth - 180
+        yaw_predicted_cpu = torch.sum(y * idx_tensor, 1).cpu().detach().numpy() * self.binwidth - 180
+        return list(zip(yaw_predicted_cpu, pitch_predicted_cpu))
+

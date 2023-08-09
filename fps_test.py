@@ -11,12 +11,16 @@ import torch.backends.cudnn as cudnn
 import torchvision
 
 import datasets
-from utils import select_device, natural_keys, gazeto3d, angular
+from utils import select_device, natural_keys, gazeto3d, angular, draw_gaze
 from model import L2CS, VRI_GazeNet
 
 from fvcore.nn import FlopCountAnalysis
 import typing
 import datetime
+import cv2
+from face_detection import RetinaFace
+from torchvision.transforms import ToPILImage
+
 
 def parse_args():
     """Parse input arguments."""
@@ -58,6 +62,7 @@ def parse_args():
     return args
 
 
+
 if __name__ == '__main__':
     args = parse_args()
     cudnn.enabled = True
@@ -65,6 +70,7 @@ if __name__ == '__main__':
     batch_size=args.batch_size
     angle=args.angle
 
+    # Transformation for the model
     transformations = transforms.Compose([
         transforms.Resize(224),
         transforms.ToTensor(),
@@ -74,23 +80,24 @@ if __name__ == '__main__':
         )
     ])
 
+    # Transformation for saving original images
+    transformations_original = transforms.Compose([
+        transforms.Resize(224),
+        transforms.ToTensor()
+    ])
+
     vri = VRI_GazeNet()
     vri.name = "VRI"
-    saved_state_dict = torch.load("../models/VRI-180-May-27-LR1e-05-DEC1e-06-drop0.3-BATCH8-augment-CROSSENTROPY-False-11.49t360-11.22t180.pkl")
+    saved_state_dict = torch.load("../models/VRI-181-June-7-LR1e-05-DEC1e-06-drop0.3-BATCH8-augment-CROSSENTROPY-True-BETA-10-180d-11.24-90d-10.98-40d-9.16.pkl")
     vri.load_state_dict(saved_state_dict)
 
-    l2cs = L2CS(torchvision.models.resnet.Bottleneck, [3, 4, 6, 3], 90)
-    l2cs.num_bins = 90
-    l2cs.name = "L2CS"
-    saved_state_dict = torch.load("../models/L2CSNet_gaze360.pkl")
-    l2cs.load_state_dict(saved_state_dict)
 
     # TEST
     folder = os.listdir(args.gaze360label_dir_test)
     folder.sort()
     testlabelpathombined = [os.path.join(args.gaze360label_dir_test, j) for j in folder]
-    gaze_dataset_test=datasets.Gaze360(testlabelpathombined,args.gaze360image_dir_test, transformations, 360, vri.binwidth)
-    
+    gaze_dataset_test = datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_test, transformations, 360, vri.binwidth)
+
     test_loader = torch.utils.data.DataLoader(
         dataset=gaze_dataset_test,
         batch_size=batch_size,
@@ -98,21 +105,61 @@ if __name__ == '__main__':
         num_workers=4,
         pin_memory=True)
 
-    for model in (l2cs, vri):
-        # Base network structure
+    # Create an unshuffled dataloader for saving original images
+    test_loader_original = torch.utils.data.DataLoader(
+        dataset=gaze_dataset_test,
+        batch_size=batch_size,
+        shuffle=False,  # Do not shuffle
+        num_workers=4,
+        pin_memory=True)
+
+    save_counter = 0  # To keep track of saved images
+    save_frequency = 10  # Save every 10th image
+
+
+    to_pil = ToPILImage()
+
+
+    for model in (vri,):
         model.cuda(gpu)
         model.eval()
         total = 0
         start = datetime.datetime.now()
-        with torch.no_grad():           
-            for j, (images, labels, cont_labels, name) in enumerate(test_loader):
-                images = Variable(images).cuda(gpu)
-                yaw_predicted, pitch_predicted = model(images)    
-                total += cont_labels.size(0)
+        with torch.no_grad():
+            for i, (images_gaze, labels_gaze, cont_labels_gaze, name) in enumerate(test_loader_original):
+                images = Variable(images_gaze).cuda(gpu)
+                gazes = model.angles_gpu(images, gpu)
+                yaw_predicted, pitch_predicted = gazes[0]
+
+                images_np = images_gaze[0].cpu().numpy()  # Access the first image from the batch and convert to NumPy array
+                images_pil = to_pil(images_gaze[0])  # Access the first image from the batch and convert to PIL Image
+
+                # Draw ground truth in yellow
+                ground_truth_yaw = cont_labels_gaze[i, 0] * np.pi / 180.0
+                ground_truth_pitch = cont_labels_gaze[i, 1] * np.pi / 180.0
+                draw_gaze(0, 0, images_gaze.shape[3], images_gaze.shape[2], images_np, (ground_truth_yaw, ground_truth_pitch), color=(255, 255, 0), scale=1, thickness=4, size=images_gaze.shape[3], bbox=((0, 0), (images_gaze.shape[3], images_gaze.shape[2])))
+
+                # Draw predicted gaze in blue
+                images_normalized = transformations(images_gaze)  # Apply transformations to the original image
+                images_normalized = images_normalized.unsqueeze(0).cuda(gpu)  # Add batch dimension and move to GPU
+                gazes_model = model.angles_gpu(images_normalized, gpu)
+                yaw_predicted_model, pitch_predicted_model = gazes_model[0]
+                draw_gaze(0, 0, images_gaze.shape[3], images_gaze.shape[2], images_np, (yaw_predicted_model, pitch_predicted_model), color=(0, 0, 255), scale=1, thickness=4, size=images_gaze.shape[3], bbox=((0, 0), (images_gaze.shape[3], images_gaze.shape[2])))
+
+                cv2.imwrite("gaze_" + name[0] + ".jpg", images_pil)
+                save_counter += 1
+
+                if save_counter >= 20:
+                    print("SAVED ALL")
+                    break  # Stop processing after saving 20 images
+
 
         end = datetime.datetime.now()
         duration = end - start
         seconds = duration.total_seconds()
-                
-        log = f"[{model.name}] Images:{total}. Duration:{seconds}. FPS = {total/seconds}"
+
+        log = f"[{model.name}] Images: {total}. Duration: {seconds}. FPS = {total / seconds}"
         print(log)
+
+
+
