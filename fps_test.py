@@ -84,6 +84,7 @@ if __name__ == '__main__':
     transformations_original = transforms.Compose([
         transforms.Resize(224),
         transforms.ToTensor()
+        # transforms.ToPILImage()
     ])
 
     vri = VRI_GazeNet()
@@ -97,6 +98,7 @@ if __name__ == '__main__':
     folder.sort()
     testlabelpathombined = [os.path.join(args.gaze360label_dir_test, j) for j in folder]
     gaze_dataset_test = datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_test, transformations, 360, vri.binwidth)
+    gaze_dataset_test_original = datasets.Gaze360(testlabelpathombined, args.gaze360image_dir_test, transformations_original, 360, vri.binwidth)
 
     test_loader = torch.utils.data.DataLoader(
         dataset=gaze_dataset_test,
@@ -107,7 +109,7 @@ if __name__ == '__main__':
 
     # Create an unshuffled dataloader for saving original images
     test_loader_original = torch.utils.data.DataLoader(
-        dataset=gaze_dataset_test,
+        dataset=gaze_dataset_test_original,
         batch_size=batch_size,
         shuffle=False,  # Do not shuffle
         num_workers=4,
@@ -129,41 +131,40 @@ if __name__ == '__main__':
             for i, (images_gaze, labels_gaze, cont_labels_gaze, name) in enumerate(test_loader_original):
                 print("Processing")
 
-                # print("ORIGIN SHAPE", images_gaze.shape)
+                print("ORIGIN SHAPE", images_gaze.shape)
 
                 image_gaze = images_gaze[0]  # Get the first image from the batch
 
-                # print(image_gaze.shape, "SHAPE in 0", image_gaze.type)
+                print(image_gaze.shape, "SHAPE in 0", image_gaze.type)
 
                 image_model = Variable(transformations(to_pil(image_gaze))).cuda(gpu).unsqueeze(0)
 
                 with torch.no_grad():
-                    gazes = vri.angles_gpu(image_model, gpu)
+                    gazes = model.angles_gpu(image_model, gpu)
                     yaw_predicted, pitch_predicted = gazes[0]
 
-                array = image_gaze.numpy()
-                image_gaze_np = np.transpose(array, (1, 2, 0))  # Reorder dimensions to (height, width, channels)
-                image_gaze_np = (image_gaze_np * 255).astype(np.uint8)  # Convert to 8-bit integer values
+                                
+                numpy_array = image_gaze.cpu().numpy()  # Convert tensor to numpy array
+                image_gaze_cv = np.transpose(numpy_array, (1, 2, 0))  # Reorder dimensions to (height, width, channels)
+                image_gaze_cv = (image_gaze_cv * 255).astype(np.uint8)  # Convert to 8-bit integer values
+
+                image_gaze_cv = cv2.cvtColor(image_gaze_cv, cv2.COLOR_RGB2BGR)
 
 
-                print(image_gaze_np.shape, "SHAPE NP")
 
-                images_drawn = draw_gaze(0, 0, image_gaze_np.shape[2], image_gaze_np.shape[1], image_gaze_np,
-                                        (cont_labels_gaze[i, 0] * np.pi / 180.0, cont_labels_gaze[i, 1] * np.pi / 180.0),
+                # Draw gaze lines using the OpenCV image
+                images_drawn = draw_gaze(0, 0, image_gaze_cv.shape[1], image_gaze_cv.shape[0], image_gaze_cv,
+                                        (cont_labels_gaze[0, 0] * np.pi / 180.0, cont_labels_gaze[0, 1] * np.pi / 180.0),
                                         color=(255, 255, 0), scale=1, thickness=4, size=image_gaze.shape[2],
-                                        bbox=((0, 0), (image_gaze_np.shape[2], image_gaze_np.shape[1])))
+                                        bbox=((0, 0), (image_gaze_cv.shape[1], image_gaze_cv.shape[0])))
 
-                # draw_gaze(x_min,y_min,bbox_width, bbox_height,frame,(yaw_predicted,pitch_predicted),color=(185, 240, 113), scale=1, thickness=4, size=x_max-x_min, bbox=((x_min, y_min), (x_max, y_max)))
-                    
-
-                images_drawn = draw_gaze(0, 0, image_gaze_np.shape[2], image_gaze_np.shape[1], images_drawn,
+                images_drawn = draw_gaze(0, 0, image_gaze_cv.shape[1], image_gaze_cv.shape[0], images_drawn,
                                         (yaw_predicted, pitch_predicted),
                                         color=(0, 0, 255), scale=1, thickness=4, size=image_gaze.shape[2],
-                                        bbox=((0, 0), (image_gaze_np.shape[2], image_gaze_np.shape[1])))
+                                        bbox=((0, 0), (image_gaze_cv.shape[1], image_gaze_cv.shape[0])))
 
-                print("saving, ", cv2.imwrite("gaze_" + name[0] + ".jpg", images_drawn))
+                print("saving, ", cv2.imwrite("gaze_" + str(save_counter) + ".jpg", images_drawn))
                 save_counter += 1
-
                 if save_counter >= 20:
                     print("SAVED ALL")
                     break
